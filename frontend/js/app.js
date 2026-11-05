@@ -43,3 +43,19 @@ async function api(path, body) {
   return r.json();
 }
 let toastT;
+function toast(msg, err = false) {
+  const t = $('#toast');
+  t.textContent = msg; t.className = 'toast' + (err ? ' err' : ''); t.style.display = 'block';
+  clearTimeout(toastT); toastT = setTimeout(() => (t.style.display = 'none'), err ? 6000 : 3000);
+}
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const debounce = (fn, ms) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; };
+const kpi = (k, v, s = '') => `<div class="kpi"><div class="k">${k}</div><div class="v">${v}</div>${s ? `<div class="s">${s}</div>` : ''}</div>`;
+const pct = (v, d = 1) => (v === null || v === undefined ? '—' : (100 * v).toFixed(d) + '%');
+const seg = (id) => $(`#${id} button.on`)?.dataset.v;
+$$('.seg').forEach((g) => g.addEventListener('click', (e) => {
+  const b = e.target.closest('button'); if (!b) return;
+  if (g.id === 'b-p') { b.classList.toggle('on'); return; }
+  g.querySelectorAll('button').forEach((x) => x.classList.toggle('on', x === b));
+}));
+
