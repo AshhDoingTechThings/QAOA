@@ -253,3 +253,14 @@ def describe_solution(model: Model, index: int, optimum: float | None = None) ->
     return out
 
 
+def suggest_penalties(sc: Scenario) -> Dict[str, float]:
+    """Penalty weights large enough that every constraint violation (≥1 unit)
+    costs more than the largest possible swing of the objective."""
+    lam = sc.lambdas
+    swing = sum(f.cost * MAX_UNITS + lam.demand * f.priority * f.demand for f in sc.facilities)
+    n_d = sum(1 for f in sc.facilities if f.demand > 0)
+    swing += lam.fairness * n_d * (n_d - 1) / 2 * 9  # each ratio² ≤ 9 at most
+    p = round(swing + 1.0, 1)
+    return {"capacity": p, "min_service": p, "objective_swing": swing}
+
+
