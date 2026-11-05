@@ -211,3 +211,16 @@ def jain_index(sc: Scenario, alloc):
     return (sum(r) ** 2) / (len(r) * sum(x * x for x in r))
 
 
+def feasible_mask(model: Model) -> np.ndarray:
+    """Vectorised feasibility of every computational-basis state (slack ignored)."""
+    sc, b = model.scenario, model.bits
+    ok = np.ones(b.shape[0], dtype=bool)
+    tot = np.zeros(b.shape[0], dtype=np.int32)
+    for f, fac in enumerate(sc.facilities):
+        a = b[:, 2 * f].astype(np.int32) + 2 * b[:, 2 * f + 1]
+        tot += a
+        ok &= (a <= fac.capacity) & (a >= fac.min_service)
+    ok &= tot <= sc.supply
+    return ok
+
+
