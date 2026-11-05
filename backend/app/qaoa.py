@@ -57,3 +57,11 @@ class QAOASim:
             v[:, 1, :] = s * a + c * b
         return psi
 
+    def state(self, params, p):
+        g, b = params[:p], params[p:]
+        psi = np.full(self.N, 1 / math.sqrt(self.N), dtype=np.complex128)
+        for k in range(p):
+            psi *= np.exp(-1j * g[k] * self.Hn)
+            psi = self.mixer(psi, b[k])
+        return psi
+
