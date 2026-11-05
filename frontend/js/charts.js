@@ -92,3 +92,54 @@ export function barChart(container, { categories, series, yMax, yFormat = (v) =>
   });
 }
 
+/** Multi-series line chart with crosshair tooltip. */
+export function lineChart(container, { series, xLabel = '', yLabel = '', yMax, yMin = 0, xTicks, yFormat = (v) => fmt(v), xFormat = (v) => v, height = 220, logY = false }) {
+  container.innerHTML = '';
+  legend(container, series);
+  const W = Math.max(320, container.clientWidth || 560), H = height, m = { t: 10, r: 12, b: 34, l: 50 };
+  const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img' }, container);
+  const iw = W - m.l - m.r, ih = H - m.t - m.b;
+  const xs = series.flatMap((s) => s.points.map((p) => p[0]));
+  const ys = series.flatMap((s) => s.points.map((p) => p[1])).filter((v) => v !== null);
+  const x0 = Math.min(...xs), x1 = Math.max(...xs);
+  let y0 = logY ? Math.pow(10, Math.floor(Math.log10(Math.max(1e-9, Math.min(...ys))))) : (yMin ?? Math.min(...ys));
+  let y1 = yMax ?? (logY ? Math.pow(10, Math.ceil(Math.log10(Math.max(...ys)))) : niceMax(Math.max(...ys)));
+  if (y1 === y0) y1 = y0 + 1;
+  let linTicks = null;
+  if (!logY) {
+    const st = niceStep(y1 - y0);
+    y0 = Math.floor(y0 / st + 1e-9) * st;
+    if (yMax === undefined) y1 = Math.ceil(y1 / st - 1e-9) * st;
+    linTicks = [];
+    for (let v = y0; v <= y1 + st * 1e-6; v += st) linTicks.push(v);
+  }
+  const X = (v) => m.l + (x1 === x0 ? iw / 2 : ((v - x0) / (x1 - x0)) * iw);
+  const Y = (v) => logY ? m.t + ih - ((Math.log10(v) - Math.log10(y0)) / (Math.log10(y1) - Math.log10(y0))) * ih : m.t + ih - ((v - y0) / (y1 - y0)) * ih;
+  const yt = logY ? range(Math.log10(y0), Math.log10(y1), Math.max(1, Math.ceil((Math.log10(y1) - Math.log10(y0)) / 5))).map((e) => Math.pow(10, e)) : linTicks;
+  yt.forEach((v, k) => {
+    el('line', { x1: m.l, x2: W - m.r, y1: Y(v), y2: Y(v), class: k === 0 ? 'baseline' : 'gridline' }, svg);
+    const t = el('text', { x: m.l - 6, y: Y(v) + 3.5, 'text-anchor': 'end' }, svg); t.textContent = yFormat(v);
+  });
+  const xticks = xTicks || [...new Set(xs)].sort((a, b) => a - b).filter((_, i, arr) => arr.length <= 10 || i % Math.ceil(arr.length / 8) === 0);
+  xticks.forEach((v) => { const t = el('text', { x: X(v), y: H - m.b + 15, 'text-anchor': 'middle' }, svg); t.textContent = xFormat(v); });
+  if (xLabel) { const t = el('text', { x: m.l + iw / 2, y: H - 4, 'text-anchor': 'middle' }, svg); t.textContent = xLabel; }
+  if (yLabel) { const t = el('text', { x: 12, y: m.t + ih / 2, 'text-anchor': 'middle', transform: `rotate(-90 12 ${m.t + ih / 2})` }, svg); t.textContent = yLabel; }
+  series.forEach((s) => {
+    const pts = s.points.filter((p) => p[1] !== null);
+    if (!pts.length) return;
+    el('path', { d: pts.map((p, i) => `${i ? 'L' : 'M'}${X(p[0])},${Y(p[1])}`).join(''), fill: 'none', stroke: s.color, 'stroke-width': 2, 'stroke-dasharray': s.dashed ? '5 4' : '', 'stroke-linejoin': 'round' }, svg);
+    if (s.markers !== false && pts.length <= 30) pts.forEach((p) => el('circle', { cx: X(p[0]), cy: Y(p[1]), r: 4, fill: s.color, stroke: 'var(--surface-1)', 'stroke-width': 2 }, svg));
+  });
+  const cross = el('line', { y1: m.t, y2: m.t + ih, stroke: 'var(--text-muted)', 'stroke-width': 1, opacity: 0 }, svg);
+  const hit = el('rect', { x: m.l, y: m.t, width: iw, height: ih, fill: 'transparent' }, svg);
+  const allX = [...new Set(xs)].sort((a, b) => a - b);
+  hit.addEventListener('mousemove', (ev) => {
+    const r = svg.getBoundingClientRect();
+    const vx = x0 + ((ev.clientX - r.left) * (W / r.width) - m.l) / iw * (x1 - x0);
+    const nx = allX.reduce((a, b) => (Math.abs(b - vx) < Math.abs(a - vx) ? b : a), allX[0]);
+    cross.setAttribute('x1', X(nx)); cross.setAttribute('x2', X(nx)); cross.setAttribute('opacity', 1);
+    const rows = series.map((s) => { const p = s.points.find((q) => q[0] === nx); return p && p[1] !== null ? `<div class="r"><span><span class="swatch" style="background:${s.color}"></span>${s.name}</span><b>${yFormat(p[1])}</b></div>` : ''; }).join('');
+    showTip(`<div class="t">${xLabel || 'x'} = ${xFormat(nx)}</div>${rows}`, ev.clientX, ev.clientY);
+  });
+  hit.addEventListener('mouseleave', () => { hideTip(); cross.setAttribute('opacity', 0); });
+}
