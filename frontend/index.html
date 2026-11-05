@@ -200,6 +200,55 @@
   </div>
 </section>
 
+<!-- ============================================================ 4 QAOA -->
+<section class="stage" data-stage="4">
+  <div class="col">
+    <div class="panel">
+      <div class="kicker">Step 4 · QAOA</div>
+      <h2>Variational quantum circuit</h2>
+      <div class="eq">|γ,β⟩ = Π<sub>k=1..p</sub> e<sup>−iβ<sub>k</sub>H<sub>M</sub></sup> e<sup>−iγ<sub>k</sub>H<sub>C</sub></sup> |+⟩<sup>⊗n</sup></div>
+      <div class="eq">min<sub>γ,β</sub> ⟨γ,β| H<sub>C</sub> |γ,β⟩ &nbsp;(or CVaR<sub>α</sub>)</div>
+      <div class="slider-row"><label>Depth p</label><input type="range" id="q-p" min="1" max="5" step="1" value="3"><span class="val" id="q-p-v">3</span></div>
+      <div class="field"><label>Objective</label><div class="seg" id="q-obj"><button data-v="expectation">⟨H⟩</button><button data-v="cvar" class="on">CVaR α</button></div></div>
+      <div class="slider-row"><label>CVaR α</label><input type="range" id="q-alpha" min="0.05" max="1" step="0.05" value="0.25"><span class="val" id="q-alpha-v">0.25</span></div>
+      <div class="field"><label>Initialisation</label><div class="seg" id="q-init"><button data-v="interp" class="on">INTERP</button><button data-v="ramp">Linear ramp</button><button data-v="random">Random</button></div></div>
+      <div class="field"><label>Classical optimiser</label><select id="q-opt"><option>COBYLA</option><option>Nelder-Mead</option><option>Powell</option></select></div>
+      <div class="field"><label>Shots</label><select id="q-shots"><option>512</option><option>1024</option><option selected>2048</option><option>4096</option><option>8192</option></select></div>
+      <div class="hr"></div>
+      <label class="toggle"><input type="checkbox" id="q-noise" checked> Run on a noisy simulator as well (depolarising + read-out)</label>
+      <div class="slider-row"><label>1q error ε₁</label><input type="range" id="q-e1" min="0" max="0.01" step="0.0005" value="0.001"><span class="val" id="q-e1-v">0.001</span></div>
+      <div class="slider-row"><label>2q error ε₂</label><input type="range" id="q-e2" min="0" max="0.05" step="0.001" value="0.01"><span class="val" id="q-e2-v">0.010</span></div>
+      <div class="slider-row"><label>Read-out</label><input type="range" id="q-ro" min="0" max="0.1" step="0.005" value="0.02"><span class="val" id="q-ro-v">0.020</span></div>
+      <div class="row" style="margin-top:10px"><button class="btn primary" id="q-run">⚛ Run QAOA</button><span class="small muted" id="q-status"></span></div>
+    </div>
+    <div class="panel">
+      <h3>Run summary</h3>
+      <div class="kpis" id="q-kpis"><div class="muted small">No run yet.</div></div>
+      <div id="q-verify" style="margin-top:10px"></div>
+    </div>
+    <div class="panel">
+      <h3>Circuit resources (Qiskit transpiler)</h3>
+      <div class="table-wrap"><table class="data" id="q-circ"></table></div>
+      <div class="row" style="margin-top:8px"><button class="btn small" id="q-qasm" disabled>⬇ OpenQASM 2.0</button><span class="small muted">Load the file into IBM Quantum to run it on real hardware.</span></div>
+    </div>
+  </div>
+  <div class="right">
+    <div class="viz h3d" id="host-land">
+      <div class="overlay-tl"><b>p = 1 energy landscape F(γ, β)</b><br><span class="small" id="land-sub">valleys = low energy · line = optimiser path (first layer)</span></div>
+      <div class="overlay-br small" id="land-legend"></div>
+      <div class="busy" id="land-busy"><div><div class="spinner"></div>computing landscape…</div></div>
+    </div>
+    <div class="grid2">
+      <div class="panel"><div class="viz-title">Optimiser convergence</div><div class="viz-sub">objective per circuit evaluation</div><div class="chart" id="ch-conv"></div></div>
+      <div class="panel"><div class="viz-title">Circuit (one layer shown)</div><div class="viz-sub" id="circ-sub"></div><div class="circuit-wrap" id="circ-svg"></div></div>
+    </div>
+    <div class="viz h3d short" id="host-sky">
+      <div class="overlay-tl"><b>Measured bit-string distribution</b><br><span class="small">solid = feasible · ghost = violates a constraint · ★ = optimal allocation</span></div>
+      <div class="overlay-tr small" id="sky-legend"></div>
+    </div>
+  </div>
+</section>
+
 </main>
 </body>
 </html>
