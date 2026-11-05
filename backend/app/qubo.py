@@ -92,3 +92,9 @@ class Model:
             self._bits = ((idx[:, None] >> np.arange(self.n_qubits)) & 1).astype(np.int8)
         return self._bits
 
+    @property
+    def energies(self) -> np.ndarray:
+        if self._energies is None:
+            self._energies = qubo_energy_all(self.Q, self.const, self.bits)
+        return self._energies
+
