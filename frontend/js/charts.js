@@ -39,3 +39,9 @@ function legend(container, series) {
   container.appendChild(lg);
 }
 
+function roundedTopBar(x, y, w, h, r = 4) {
+  if (h <= 0) return '';
+  r = Math.min(r, w / 2, h);
+  return `M${x},${y + h}V${y + r}Q${x},${y} ${x + r},${y}H${x + w - r}Q${x + w},${y} ${x + w},${y + r}V${y + h}Z`;
+}
+
