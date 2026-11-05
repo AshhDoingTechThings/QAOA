@@ -149,3 +149,25 @@ function clampNum(t) {
 }
 
 /* ------------------------------------------------------------- model/QUBO */
+async function refreshModel() {
+  try {
+    const m = await api('/api/model', S.scenario);
+    S.model = m;
+    S.exact = S.greedy = S.sa = S.qaoa = null;
+    S.bench = null;
+    renderModel();
+    city.setScenario(S.scenario);
+    ising.setModel(m, S.scenario);
+    resetQAOAView();
+    S.exact = await api('/api/solve/exact', S.scenario);
+    S.greedy = await api('/api/solve/greedy', S.scenario);
+    renderValidity();
+    renderOverview();
+    renderResults();
+    if (CITY_HOST[S.stage]) setStage(S.stage);
+  } catch (e) {
+    toast(e.message, true);
+    $('#sc-size').textContent = e.message;
+  }
+}
+
