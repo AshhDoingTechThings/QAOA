@@ -26,3 +26,10 @@ class Facility(BaseModel):
     min_service: int = Field(default=0, ge=0, le=MAX_UNITS)
 
 
+class Lambdas(BaseModel):
+    capacity: float = Field(default=12.0, ge=0)     # λ1  hard: facility capacity + total stock
+    demand: float = Field(default=2.0, ge=0)        # λ2  objective: priority-weighted unmet demand
+    fairness: float = Field(default=3.0, ge=0)      # λ3  soft: equity of coverage ratios
+    min_service: float = Field(default=12.0, ge=0)  # λ4  hard: minimum service guarantee
+
+
