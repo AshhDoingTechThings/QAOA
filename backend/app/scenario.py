@@ -43,3 +43,11 @@ class Scenario(BaseModel):
     lambdas: Lambdas = Lambdas()
     description: Optional[str] = None
 
+    @field_validator("facilities")
+    @classmethod
+    def _n_fac(cls, v):
+        if not 2 <= len(v) <= 6:
+            raise ValueError("Use between 2 and 6 facilities")
+        return v
+
+
