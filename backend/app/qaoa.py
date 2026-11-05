@@ -234,3 +234,19 @@ class QAOASim:
         return counts, exp_sum / shots, fidelity
 
 
+# ---------------------------------------------------------------- circuits
+def analytic_circuit_stats(n, edges, n_h, p):
+    t = np.zeros(n)
+    t += 1  # H layer
+    for _ in range(p):
+        for i, j, _ in edges:  # RZZ = CX · RZ · CX
+            s = max(t[i], t[j])
+            t[i] = t[j] = s + 3
+        t += 0  # RZ fused into the layer below (per-qubit)
+        for q in range(n):
+            t[q] += 1  # RZ (h) – counted even if h=0 for simplicity
+            t[q] += 1  # RX
+    return {"depth": int(t.max()), "cx": 2 * len(edges) * p, "rzz": len(edges) * p,
+            "one_qubit": n + p * (n_h + n)}
+
+
