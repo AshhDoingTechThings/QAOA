@@ -178,3 +178,17 @@ export class LandscapeScene {
 }
 
 /* ------------------------------------------------------------------ skyline */
+export class SkylineScene {
+  constructor(tooltip) {
+    this.vp = new Viewport({ position: [0, 11.5, 12.5], target: [0, 0.6, -0.8], fov: 40 });
+    this.g = new THREE.Group();
+    this.vp.scene.add(this.g);
+    this.tooltip = tooltip;
+    this.vp.onHover = (hit) => this._hover(hit);
+    this.vp.updaters.push((dt) => this._tick(dt));
+    this.grow = [];
+  }
+
+  mount(host) { this.vp.mount(host); }
+
+}
