@@ -78,3 +78,12 @@ def test_simulator_matches_qiskit_statevector():
     assert chk["fidelity"] == pytest.approx(1.0, abs=1e-9)
 
 
+def test_qaoa_beats_uniform_sampling():
+    m = build_model(PRESETS["nurses"])
+    ex = exact(m)
+    r = run_qaoa(m, ex["optimum"], encode_alloc(m, ex["solution"]["alloc"]), p=3, objective="cvar",
+                 alpha=0.25, crosscheck=False)
+    assert r["ideal"]["amplification_opt"] > 2
+    assert r["ideal"]["amplification_feasible"] > 1.2
+
+
