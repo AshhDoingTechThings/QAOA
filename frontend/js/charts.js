@@ -191,3 +191,44 @@ export function heatmap(canvas, Q, labels, groups) {
   canvas.onmouseleave = hideTip;
 }
 
+/** Schematic of one QAOA layer. */
+export function circuitSVG(container, model, p, gammas, betas) {
+  const n = model.n_qubits;
+  const rowH = n > 12 ? 18 : 22, top = 18, left = 34;
+  const edges = model.J_edges;
+  const costW = Math.min(300, 40 + edges.length * 5);
+  const W = left + 40 + costW + 30 + 70 + 40 + 30;
+  const H = top + n * rowH + 20;
+  container.innerHTML = '';
+  const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, width: '100%' }, container);
+  const yq = (i) => top + i * rowH + rowH / 2;
+  for (let i = 0; i < n; i++) {
+    el('line', { x1: left, x2: W - 10, y1: yq(i), y2: yq(i), stroke: '#3a4254' }, svg);
+    const t = el('text', { x: 4, y: yq(i) + 4, fill: '#a9b1c3', 'font-size': 10 }, svg); t.textContent = `q${i}`;
+  }
+  let x = left + 6;
+  for (let i = 0; i < n; i++) gate(svg, x, yq(i), 'H', '#232a3b', rowH);
+  x += 30;
+  // cost block
+  el('rect', { x, y: top + 1, width: costW, height: n * rowH - 2, rx: 8, fill: 'rgba(57,135,229,.10)', stroke: '#3987e5' }, svg);
+  const lab = el('text', { x: x + costW / 2, y: top - 5, 'text-anchor': 'middle', fill: '#7cc4ff', 'font-size': 10 }, svg);
+  lab.textContent = `U_C(γ₁=${gammas ? gammas[0].toFixed(3) : 'γ'})  ·  ${edges.length} RZZ + ${model.h.filter((h) => Math.abs(h) > 1e-12).length} RZ`;
+  edges.forEach((e, k) => {
+    const ex = x + 14 + (k * (costW - 28)) / Math.max(1, edges.length - 1);
+    el('line', { x1: ex, x2: ex, y1: yq(e.i), y2: yq(e.j), stroke: e.J < 0 ? '#3987e5' : '#e34948', 'stroke-width': 1.2, opacity: 0.85 }, svg);
+    el('circle', { cx: ex, cy: yq(e.i), r: 2.2, fill: '#eef1f6' }, svg);
+    el('circle', { cx: ex, cy: yq(e.j), r: 2.2, fill: '#eef1f6' }, svg);
+  });
+  x += costW + 12;
+  for (let i = 0; i < n; i++) gate(svg, x, yq(i), 'RX', '#2a2440', rowH, 36);
+  const bl = el('text', { x: x + 18, y: top - 5, 'text-anchor': 'middle', fill: '#a58bff', 'font-size': 10 }, svg);
+  bl.textContent = `U_M(β₁=${betas ? betas[0].toFixed(3) : 'β'})`;
+  x += 48;
+  const pl = el('text', { x: x + 14, y: top + (n * rowH) / 2 + 4, 'text-anchor': 'middle', fill: '#eef1f6', 'font-size': 13, 'font-weight': 700 }, svg);
+  pl.textContent = `× ${p}`;
+  x += 36;
+  for (let i = 0; i < n; i++) {
+    el('rect', { x, y: yq(i) - rowH * 0.36, width: 22, height: rowH * 0.72, rx: 3, fill: '#1a1f2d', stroke: '#6f7890' }, svg);
+    el('path', { d: `M${x + 4},${yq(i) + 3} Q${x + 11},${yq(i) - 6} ${x + 18},${yq(i) + 3}`, fill: 'none', stroke: '#a9b1c3' }, svg);
+  }
+}
