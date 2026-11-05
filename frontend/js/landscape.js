@@ -244,4 +244,14 @@ export class SkylineScene {
     });
   }
 
+  _tick(dt) {
+    for (const g of this.grow) {
+      if (g.t >= 1) continue;
+      g.t += dt * 1.6;
+      const p = Math.max(0, Math.min(1, g.t));
+      g.bar.scale.y = Math.max(0.001, g.h * (1 - Math.pow(1 - p, 3)));
+      g.bar.children.forEach((c) => { if (c.isCSS2DObject) c.position.y = 1.0 + 0.25 / Math.max(g.bar.scale.y, 0.05); });
+    }
+  }
+
 }
