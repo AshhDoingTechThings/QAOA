@@ -34,3 +34,4 @@ except Exception:  # pragma: no cover
     HAVE_QISKIT = False
 
 
+class QAOASim:
