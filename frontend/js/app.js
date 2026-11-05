@@ -213,3 +213,10 @@ function renderModel() {
   ].join('');
 }
 
+function renderValidity() {
+  const b = $('#valid-badge'); const ex = S.exact;
+  if (!ex) return;
+  b.className = 'badge ' + (ex.formulation_valid ? 'ok' : 'no');
+  b.innerHTML = ex.formulation_valid ? '✓ QUBO ground state = feasible optimum' : '✕ QUBO ground state is infeasible: increase λ₁/λ₄';
+}
+
