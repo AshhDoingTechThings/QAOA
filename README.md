@@ -58,3 +58,8 @@ cd backend && ../.venv/bin/python -m pytest -q
 6. **Results.** Switch between solvers and watch units fly to the hospitals. Every constraint is checked.
 7. **Benchmark.** Run 3 seeds at p = 1–3. Feasibility and P_opt rise with p, while noise and the CX count rise too. Exact search and annealing win on this small instance, which is exactly what the project set out to measure honestly.
 
+## Notes and limits
+
+- Exact statevector simulation is capped at 16 qubits (6 facilities). Real hardware runs use the exported QASM.
+- The noise model applies a stochastic Pauli channel after each layer, with a probability set by the per-qubit gate count, plus read-out flips. It is a depolarising approximation, not a calibrated device model.
+- With shots ≥ 2ⁿ, plain sampling can find the optimum by luck. That is why P_opt and the feasible probability mass are reported against uniform random sampling.
