@@ -135,4 +135,14 @@ export class LandscapeScene {
     this.endLabel = label('p=1 optimum (γ*, β*)', 'label3d'); this.endLabel.visible = false; this.path.add(this.endLabel);
   }
 
+  sampleZ(g, b) {
+    const L = this.L;
+    const fa = ((g - L.gammas[0]) / (L.gammas.at(-1) - L.gammas[0])) * (L.gammas.length - 1);
+    const fb = ((b - L.betas[0]) / (L.betas.at(-1) - L.betas[0])) * (L.betas.length - 1);
+    const a0 = Math.max(0, Math.min(L.gammas.length - 2, Math.floor(fa))), b0 = Math.max(0, Math.min(L.betas.length - 2, Math.floor(fb)));
+    const ta = Math.min(1, Math.max(0, fa - a0)), tb = Math.min(1, Math.max(0, fb - b0));
+    const Z = L.Z;
+    return (Z[a0][b0] * (1 - ta) * (1 - tb) + Z[a0 + 1][b0] * ta * (1 - tb) + Z[a0][b0 + 1] * (1 - ta) * tb + Z[a0 + 1][b0 + 1] * ta * tb);
+  }
+
 }
