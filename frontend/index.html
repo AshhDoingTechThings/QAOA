@@ -88,6 +88,45 @@
   </div>
 </section>
 
+<!-- ============================================================ 1 SCENARIO -->
+<section class="stage" data-stage="1">
+  <div class="col">
+    <div class="panel">
+      <div class="kicker">Step 1 · Scenario input</div>
+      <h2>Configure the allocation problem</h2>
+      <p>Each facility has a <b>demand</b>, a <b>capacity</b>, a per-unit <b>cost</b>, a clinical <b>priority</b> and a <b>minimum service</b> level. Quantities are in units of 0–3. One unit can stand for a batch (for example, 5 ventilators).</p>
+      <div class="grid2" style="margin-top:10px">
+        <div><label class="small muted">Resource</label><input type="text" id="sc-resource" style="width:100%"></div>
+        <div><label class="small muted">Unit size</label><input type="number" id="sc-unit" min="1" max="1000" style="width:100%"></div>
+        <div><label class="small muted">Total stock S (units)</label><input type="number" id="sc-supply" min="0" max="24" style="width:100%"></div>
+        <div><label class="small muted">Unit label</label><input type="text" id="sc-unitlabel" style="width:100%"></div>
+      </div>
+    </div>
+    <div class="panel">
+      <h3>Facilities</h3>
+      <div class="table-wrap">
+        <table class="data fac" id="fac-table">
+          <thead><tr><th>Name</th><th title="demand (units)">d</th><th title="capacity (units)">cap</th><th title="cost per unit">c</th><th title="priority">p</th><th title="minimum service">min</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn small" id="fac-add">+ Add facility</button>
+        <span class="small muted" id="sc-size"></span>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="note"><span class="who">Engineer's note</span>The qubit budget is the real constraint on today's hardware. Every facility costs <b>2 qubits</b>, and the stock limit adds <b>⌈log₂(S+1)⌉ slack qubits</b>. This app simulates up to 16 qubits exactly; beyond that the number of states (2<sup>n</sup>) makes exact simulation impractical.</div>
+    </div>
+  </div>
+  <div class="right">
+    <div class="viz h3d" id="host-city-1">
+      <div class="overlay-tl"><b>Regional network</b><br><span class="small">Ghost cubes = demand · red frame = capacity · central core = stock</span></div>
+    </div>
+    <div class="kpis" id="sc-kpis"></div>
+  </div>
+</section>
+
 </main>
 </body>
 </html>
