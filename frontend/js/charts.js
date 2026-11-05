@@ -31,3 +31,11 @@ function niceStep(span, n = 4) {
 }
 const fmt = (v, d = 2) => (v === null || v === undefined || Number.isNaN(v) ? '—' : Math.abs(v) >= 1000 ? v.toLocaleString(undefined, { maximumFractionDigits: 0 }) : (+v).toFixed(d));
 
+function legend(container, series) {
+  if (series.length < 2) return;
+  const lg = document.createElement('div');
+  lg.className = 'legend';
+  lg.innerHTML = series.map((s) => `<span><span class="swatch" style="background:${s.color};${s.dashed ? 'opacity:.6' : ''}"></span>${s.name}</span>`).join('');
+  container.appendChild(lg);
+}
+
