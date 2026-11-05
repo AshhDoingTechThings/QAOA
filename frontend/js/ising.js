@@ -130,3 +130,4 @@ export class IsingScene {
   }
 }
 
+function escape(s) { return String(s).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c])); }
