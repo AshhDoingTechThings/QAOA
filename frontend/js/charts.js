@@ -145,3 +145,49 @@ export function lineChart(container, { series, xLabel = '', yLabel = '', yMax, y
 }
 function range(a, b, s) { const o = []; for (let v = a; v <= b + 1e-9; v += s) o.push(v); return o; }
 
+/** Diverging heat-map of a symmetric matrix (blue negative · gray 0 · red positive). */
+export function heatmap(canvas, Q, labels, groups) {
+  const n = Q.length;
+  const cell = Math.max(14, Math.floor(560 / (n + 2)));
+  const lab = 58;
+  const size = lab + n * cell + 4;
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  canvas.width = size * dpr; canvas.height = size * dpr;
+  canvas.style.aspectRatio = '1 / 1';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, size, size);
+  let mx = 0;
+  Q.forEach((r) => r.forEach((v) => (mx = Math.max(mx, Math.abs(v)))));
+  const neutral = [56, 56, 53], blue = [57, 135, 229], red = [227, 73, 72];
+  const col = (v) => {
+    const t = Math.min(1, Math.sqrt(Math.abs(v) / (mx || 1)));
+    const c = v < 0 ? blue : red;
+    return `rgb(${neutral.map((n0, i) => Math.round(n0 + (c[i] - n0) * t)).join(',')})`;
+  };
+  for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) {
+    const v = Q[i][j];
+    ctx.fillStyle = Math.abs(v) < 1e-9 ? '#161b27' : col(v);
+    ctx.fillRect(lab + j * cell + 1, lab + i * cell + 1, cell - 2, cell - 2);
+  }
+  ctx.fillStyle = '#a9b1c3';
+  ctx.font = `${Math.min(11, cell * 0.7)}px ui-monospace, Menlo, monospace`;
+  ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+  for (let i = 0; i < n; i++) ctx.fillText(`q${i}`, lab - 6, lab + i * cell + cell / 2);
+  ctx.save();
+  ctx.textAlign = 'left';
+  for (let j = 0; j < n; j++) { ctx.save(); ctx.translate(lab + j * cell + cell / 2, lab - 6); ctx.rotate(-Math.PI / 2); ctx.fillText(`q${j}`, 0, 0); ctx.restore(); }
+  ctx.restore();
+  // facility group outlines
+  ctx.strokeStyle = 'rgba(238,241,246,0.35)'; ctx.lineWidth = 1;
+  groups.forEach(([a, b]) => ctx.strokeRect(lab + a * cell + 0.5, lab + a * cell + 0.5, (b - a) * cell - 1, (b - a) * cell - 1));
+  canvas.onmousemove = (ev) => {
+    const r = canvas.getBoundingClientRect();
+    const sx = (ev.clientX - r.left) * (size / r.width), sy = (ev.clientY - r.top) * (size / r.height);
+    const j = Math.floor((sx - lab) / cell), i = Math.floor((sy - lab) / cell);
+    if (i < 0 || j < 0 || i >= n || j >= n) return hideTip();
+    showTip(`<div class="t">Q[${i},${j}]${i === j ? ' (linear)' : ' (coupling)'}</div><div class="r">${labels[i]}${i !== j ? ' · ' + labels[j] : ''}</div><div class="r">value<b>${Q[i][j].toFixed(3)}</b></div>`, ev.clientX, ev.clientY);
+  };
+  canvas.onmouseleave = hideTip;
+}
+
