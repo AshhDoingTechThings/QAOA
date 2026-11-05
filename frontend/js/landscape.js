@@ -96,4 +96,43 @@ export class LandscapeScene {
     return new THREE.Vector3(x, y, zc);
   }
 
+  /** trace: [{g:[..], b:[..], v, exp, stage}] — draw first-layer (γ1, β1) projection */
+  setPath(trace) {
+    if (!this.L) return;
+    this.vp.clearGroup(this.path);
+    const pts = [];
+    const p1 = trace.filter((s) => s.stage === 1);
+    for (const s of (p1.length > 1 ? p1 : trace)) {
+      let g = s.g[0], b = s.b[0];
+      if (g < 0) { g = -g; b = -b; }            // F(−γ,−β) = F(γ,β)
+      b = ((b + Math.PI / 2) % Math.PI + Math.PI) % Math.PI - Math.PI / 2;
+      g = Math.min(Math.max(g, this.L.gammas[0]), this.L.gammas.at(-1));
+      const z = this.sampleZ(g, b);
+      pts.push(this.toWorld(g, b, z).add(new THREE.Vector3(0, 0.18, 0)));
+    }
+    if (pts.length < 2) return;
+    const curve = new THREE.CatmullRomCurve3(pts, false, 'centripetal', 0.2);
+    const segs = Math.max(8, (pts.length - 1) * 4);
+    const geo = new THREE.TubeGeometry(curve, segs, 0.055, 6, false);
+    const line = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: 0xffb547, depthTest: false, transparent: true }));
+    line.renderOrder = 10;
+    this.path.add(line);
+    this.pathLine = line;
+    this.pathPts = pts;
+    this.pathCurve = curve;
+    this.pathSegs = segs;
+    geo.setDrawRange(0, 0);
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.2, 16, 12), new THREE.MeshBasicMaterial({ color: 0xffb547, depthTest: false, transparent: true }));
+    head.renderOrder = 11;
+    this.path.add(head);
+    const start = new THREE.Mesh(new THREE.SphereGeometry(0.14, 12, 8), new THREE.MeshBasicMaterial({ color: 0xeef1f6, depthTest: false, transparent: true }));
+    start.renderOrder = 11;
+    start.position.copy(pts[0]);
+    this.path.add(start);
+    this.head = head;
+    this.anim = { t: 0, dur: Math.min(4, 1 + pts.length / 60) };
+    const lb = label('start', 'label3d axis'); lb.position.copy(pts[0]).add(new THREE.Vector3(0, -0.5, 0)); this.path.add(lb);
+    this.endLabel = label('p=1 optimum (γ*, β*)', 'label3d'); this.endLabel.visible = false; this.path.add(this.endLabel);
+  }
+
 }
