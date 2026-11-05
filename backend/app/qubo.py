@@ -42,3 +42,6 @@ class QuboBuilder:
         self.Q = np.zeros((n, n))  # upper triangular, diagonal = linear terms
         self.c = 0.0
 
+    def lin(self, i, v):
+        self.Q[i, i] += v
+
