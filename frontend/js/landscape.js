@@ -254,4 +254,21 @@ export class SkylineScene {
     }
   }
 
+  _hover(hit) {
+    const tt = this.tooltip;
+    if (!hit) { if (this._shown) { tt.style.display = 'none'; this._shown = false; } return; }
+    this._shown = true;
+    const d = hit.object.userData;
+    tt.innerHTML = `<div class="t">${d.row}</div>
+      <div class="r">bit-string<b class="mono">${d.bitstring}</b></div>
+      <div class="r">allocation<b>[${d.alloc.join(', ')}]</b></div>
+      <div class="r">probability<b>${(d.prob * 100).toFixed(2)}%</b></div>
+      <div class="r">energy<b>${d.energy.toFixed(2)}</b></div>
+      <div class="r">constraints<b>${d.feasible ? '✓ feasible' : '✕ violated'}</b></div>`;
+    tt.style.display = 'block';
+    tt.style.left = hit.client[0] + 14 + 'px';
+    tt.style.top = hit.client[1] + 14 + 'px';
+  }
 }
+
+const sameAlloc = (a, b) => a && b && a.length === b.length && a.every((v, i) => v === b[i]);
