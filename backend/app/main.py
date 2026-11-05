@@ -104,3 +104,8 @@ def model(sc: Scenario):
     return out
 
 
+@app.post("/api/suggest_penalties")
+def suggest(sc: Scenario):
+    return suggest_penalties(sc)
+
+
