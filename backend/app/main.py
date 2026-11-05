@@ -60,3 +60,13 @@ class LandscapeReq(BaseModel):
     alpha: float = Field(default=0.25, gt=0, le=1)
 
 
+class BenchReq(BaseModel):
+    scenario: Scenario
+    seeds: List[int] = [0, 1, 2]
+    p_list: List[int] = [1, 2, 3]
+    shots: int = 1024
+    objective: str = "cvar"
+    alpha: float = 0.25
+    noise: Noise = Noise(enabled=True)
+
+
