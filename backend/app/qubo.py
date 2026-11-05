@@ -204,3 +204,10 @@ def is_feasible(sc: Scenario, alloc) -> bool:
     return all(c["ok"] for c in check_constraints(sc, alloc))
 
 
+def jain_index(sc: Scenario, alloc):
+    r = [a / f.demand for f, a in zip(sc.facilities, alloc) if f.demand > 0]
+    if not r or sum(r) == 0:
+        return 0.0
+    return (sum(r) ** 2) / (len(r) * sum(x * x for x in r))
+
+
