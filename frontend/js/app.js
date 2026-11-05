@@ -378,3 +378,18 @@ function renderResults() {
         <td>${fmt(R[k].rt, 1)} ms</td><td class="muted" style="text-align:left">${R[k].note}</td></tr>`;
     }).join('') + (opt !== undefined ? `<tr><td class="muted" colspan="9" style="text-align:left">C<sub>opt</sub> = ${fmt(opt, 3)} (exact enumeration of the original constrained problem)</td></tr>` : '');
 }
+function showSolver(k) {
+  const R = solverResults();
+  if (!R[k]) { city.setAllocation(null); return; }
+  const s = R[k].sol, sc = S.scenario;
+  city.setAllocation(s.alloc, SOLVERS[k].color, { animate: true });
+  city.pulse();
+  $('#res-ov-title').textContent = `${SOLVERS[k].name}: ${s.total_allocated}/${sc.supply} units allocated`;
+  $('#res-ov-sub').innerHTML = `objective ${fmt(s.objective, 2)} · Jain fairness ${fmt(s.jain_fairness, 3)} · ${s.feasible ? 'all constraints met' : 'constraint violated'}`;
+  $('#res-title').innerHTML = `Constraint check: ${SOLVERS[k].name} ${statusHTML(s.feasible)}`;
+  const rows = s.checks.map((c) => `<tr><td>${c.type.replace('_', ' ')}</td><td style="text-align:left">${esc(c.facility)}</td><td class="mono">${c.detail}</td><td>${statusHTML(c.ok, 'met', 'violated')}</td></tr>`).join('');
+  const parts = sc.facilities.map((f, i) => `<tr><td style="text-align:left">${esc(f.name)}</td><td>${s.alloc[i]}</td><td>${s.alloc_amount[i]}</td><td>${f.demand}</td><td>${f.demand ? pct(s.alloc[i] / f.demand, 0) : '—'}</td></tr>`).join('');
+  $('#res-checks').innerHTML = `<div class="table-wrap"><table class="data compact"><tr><th>Facility</th><th>Units</th><th>${esc(sc.unit_label)}</th><th>Demand</th><th>Coverage</th></tr>${parts}</table></div>
+    <div class="hr"></div><div class="table-wrap"><table class="data compact"><tr><th>Constraint</th><th style="text-align:left">Scope</th><th>Check</th><th>Status</th></tr>${rows}</table></div>
+    <p class="small muted" style="margin-top:8px">bit-string <span class="mono">${s.bitstring}</span> (q${S.model.n_qubits - 1}…q0) · QUBO energy ${fmt(s.energy, 2)}</p>`;
+}
