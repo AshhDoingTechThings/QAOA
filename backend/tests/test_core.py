@@ -71,3 +71,10 @@ def test_mixer_is_unitary_and_cost_is_diagonal():
     assert np.linalg.norm(psi) == pytest.approx(1.0)
 
 
+@pytest.mark.skipif(not HAVE_QISKIT, reason="qiskit not installed")
+def test_simulator_matches_qiskit_statevector():
+    m = build_model(PRESETS["validation"])
+    chk = qiskit_crosscheck(m, np.array([0.5, 1.1, -0.3, 0.25]), 2)
+    assert chk["fidelity"] == pytest.approx(1.0, abs=1e-9)
+
+
