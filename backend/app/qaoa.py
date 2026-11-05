@@ -429,3 +429,8 @@ def landscape(model: Model, res=36, objective="expectation", alpha=0.2):
             "e_ground": float(sim.E.min()), "e_mean": float(sim.E.mean())}
 
 
+def _thin(seq: List, k: int):
+    if len(seq) <= k:
+        return seq
+    idx = np.linspace(0, len(seq) - 1, k).astype(int)
+    return [seq[i] for i in idx]
