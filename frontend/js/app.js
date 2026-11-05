@@ -225,3 +225,10 @@ function renderValidity() {
   const inp = $('#' + id);
   inp.addEventListener('input', () => { $(`#${id}-v`).textContent = id === 'q-p' ? inp.value : (+inp.value).toFixed(id === 'q-alpha' ? 2 : 3); });
 });
+function qaoaParams() {
+  return {
+    p: +$('#q-p').value, objective: seg('q-obj'), alpha: +$('#q-alpha').value, init: seg('q-init'),
+    optimizer: $('#q-opt').value, shots: +$('#q-shots').value, restarts: 2,
+    noise: { enabled: $('#q-noise').checked, e1: +$('#q-e1').value, e2: +$('#q-e2').value, readout: +$('#q-ro').value, trajectories: 64 },
+  };
+}
