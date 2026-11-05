@@ -232,3 +232,10 @@ export function circuitSVG(container, model, p, gammas, betas) {
     el('path', { d: `M${x + 4},${yq(i) + 3} Q${x + 11},${yq(i) - 6} ${x + 18},${yq(i) + 3}`, fill: 'none', stroke: '#a9b1c3' }, svg);
   }
 }
+function gate(svg, x, y, txt, fill, rowH, w = 22) {
+  el('rect', { x, y: y - rowH * 0.36, width: w, height: rowH * 0.72, rx: 4, fill, stroke: '#4b556b' }, svg);
+  const t = el('text', { x: x + w / 2, y: y + 3.5, 'text-anchor': 'middle', fill: '#eef1f6', 'font-size': 9.5 }, svg);
+  t.textContent = txt;
+}
+
+export { fmt };
