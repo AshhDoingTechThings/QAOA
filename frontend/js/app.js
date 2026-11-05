@@ -509,3 +509,22 @@ async function boot() {
   $('#preset').addEventListener('change', (e) => loadPreset(e.target.value));
   await loadPreset(S.presetKey);
 }
+async function loadPreset(key) {
+  S.presetKey = key;
+  S.scenario = structuredClone(S.presets[key]);
+  S.landKey = null;
+  $$('.step').forEach((s) => s.classList.remove('done'));
+  renderScenarioForm();
+  await refreshModel();
+  city.setAllocation(S.stage === 0 ? null : null);
+}
+let lastW = window.innerWidth;
+window.addEventListener('resize', debounce(() => {
+  if (Math.abs(window.innerWidth - lastW) < 40) return;
+  lastW = window.innerWidth;
+  if (S.exact) renderResults();
+  if (S.qaoa) renderQAOA();
+  if (S.bench) renderBench();
+}, 300));
+window.__demo = { S, city, ising, land, sky };
+boot();
