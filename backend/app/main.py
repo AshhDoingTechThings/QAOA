@@ -24,3 +24,11 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], all
 FRONTEND = Path(__file__).resolve().parents[2] / "frontend"
 
 
+class Noise(BaseModel):
+    enabled: bool = False
+    e1: float = Field(default=0.001, ge=0, le=0.2)
+    e2: float = Field(default=0.01, ge=0, le=0.3)
+    readout: float = Field(default=0.02, ge=0, le=0.3)
+    trajectories: int = Field(default=64, ge=4, le=256)
+
+
