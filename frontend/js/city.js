@@ -209,4 +209,22 @@ export class CityScene {
     this._labels(alloc, opts.unitLabel);
   }
 
+  _arc(to, col, a) {
+    const from = new THREE.Vector3(0, 0.6, 0);
+    const end = new THREE.Vector3(to.x, 0.08, to.z);
+    const mid = from.clone().add(end).multiplyScalar(0.5);
+    mid.y = 1.6;
+    const curve = new THREE.QuadraticBezierCurve3(from, mid, end);
+    const tube = new THREE.Mesh(new THREE.TubeGeometry(curve, 48, 0.035 + 0.025 * a, 8, false),
+      new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.55 }));
+    this.dyn.add(tube);
+    for (let k = 0; k < 3; k++) {
+      const s = new THREE.Mesh(new THREE.SphereGeometry(0.11, 12, 8), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+      this.dyn.add(s);
+      this.flows.push({ curve, mesh: s, off: k / 3 });
+    }
+  }
+
+  pulse() { this._pulse = 1.0; }
+
 }
