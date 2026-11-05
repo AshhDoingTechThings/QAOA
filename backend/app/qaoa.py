@@ -355,3 +355,57 @@ def summarize_counts(model: Model, counts, optimum, opt_index, top=24):
     }
 
 
+def run_qaoa(model: Model, optimum: float, opt_index: int, p=1, optimizer="COBYLA", init="interp",
+             objective="expectation", alpha=0.2, restarts=2, maxiter=250, shots=2048, seed=0,
+             noise: Optional[Dict] = None, crosscheck=True) -> Dict:
+    sim = QAOASim(model)
+    rng = np.random.default_rng(seed)
+    t0 = time.perf_counter()
+    opt = sim.optimize(p=p, optimizer=optimizer, init=init, objective=objective, alpha=alpha,
+                       restarts=restarts, maxiter=maxiter, seed=seed)
+    params = opt["params"]
+    psi = sim.state(params, p)
+    probs = np.abs(psi) ** 2
+    fm = feasible_mask(model)
+    alloc_mask = (1 << (2 * model.n_fac)) - 1
+    opt_alloc_states = (np.arange(sim.N) & alloc_mask) == (opt_index & alloc_mask)
+    ideal = {"expectation": sim.expectation(probs), "p_opt_exact": float(probs[opt_index]),
+             "p_opt_alloc_exact": float(probs[opt_alloc_states].sum()),
+             "feasible_mass": float(probs[fm].sum()),
+             "uniform_feasible": float(fm.mean()), "uniform_p_opt": 1.0 / sim.N,
+             "uniform_expectation": float(sim.E.mean()), "ground_energy": float(sim.E.min())}
+    ideal["amplification_opt"] = ideal["p_opt_exact"] / ideal["uniform_p_opt"]
+    ideal["amplification_feasible"] = ideal["feasible_mass"] / max(ideal["uniform_feasible"], 1e-12)
+
+    counts = sim.sample(psi, shots, rng)
+    clean = summarize_counts(model, counts, optimum, opt_index)
+    total_ms = 1000 * (time.perf_counter() - t0)
+
+    out = {
+        "solver": "qaoa", "label": f"QAOA p={p}",
+        "p": p, "optimizer": optimizer, "init": init, "objective": objective, "alpha": alpha,
+        "gammas": params[:p].tolist(), "betas": params[p:].tolist(),
+        "scale": sim.scale, "evaluations": sim.n_evals,
+        "trace": _thin(opt["trace"], 300),
+        "optimize_ms": opt["optimize_ms"], "runtime_ms": total_ms,
+        "ideal": ideal, "sampled": clean,
+        "solution": clean["best_measured"],
+        "circuit": circuit_report(model, params, p),
+        "evolution": sim.evolution(params, p),
+    }
+    if noise and noise.get("enabled"):
+        t1 = time.perf_counter()
+        ncounts, nexp, fid = sim.noisy_counts(params, p, shots, rng, e1=noise.get("e1", 0.001),
+                                               e2=noise.get("e2", 0.01), ro=noise.get("readout", 0.02),
+                                               trajectories=noise.get("trajectories", 64))
+        noisy = summarize_counts(model, ncounts, optimum, opt_index)
+        noisy["expectation"] = nexp
+        noisy["est_fidelity"] = fid
+        noisy["runtime_ms"] = 1000 * (time.perf_counter() - t1)
+        out["noisy"] = noisy
+        out["noise"] = noise
+    if crosscheck:
+        out["qiskit_check"] = qiskit_crosscheck(model, params, p)
+    return out
+
+
