@@ -87,3 +87,57 @@ document.addEventListener('keydown', (e) => {
 function markDone(...ids) { ids.forEach((i) => $(`.step[data-stage="${i}"]`).classList.add('done')); }
 
 /* ---------------------------------------------------------------- scenario */
+function renderScenarioForm() {
+  const sc = S.scenario;
+  $('#sc-resource').value = sc.resource;
+  $('#sc-unit').value = sc.unit_size;
+  $('#sc-supply').value = sc.supply;
+  $('#sc-unitlabel').value = sc.unit_label;
+  const tb = $('#fac-table tbody');
+  tb.innerHTML = sc.facilities.map((f, i) => `<tr>
+    <td><input type="text" data-f="${i}" data-k="name" value="${esc(f.name)}"></td>
+    <td><input type="number" data-f="${i}" data-k="demand" min="0" max="3" value="${f.demand}"></td>
+    <td><input type="number" data-f="${i}" data-k="capacity" min="0" max="3" value="${f.capacity}"></td>
+    <td><input type="number" data-f="${i}" data-k="cost" min="0" max="20" step="0.1" value="${f.cost}"></td>
+    <td><input type="number" data-f="${i}" data-k="priority" min="0" max="10" step="0.5" value="${f.priority}"></td>
+    <td><input type="number" data-f="${i}" data-k="min_service" min="0" max="3" value="${f.min_service}"></td>
+    <td><button class="btn small" data-del="${i}" title="Remove facility" aria-label="Remove ${esc(f.name)}" ${sc.facilities.length <= 2 ? 'disabled' : ''}>✕</button></td></tr>`).join('');
+  ['capacity', 'demand', 'fairness', 'min_service'].forEach((k) => {
+    $(`#lam-${k}`).value = sc.lambdas[k];
+    $(`#lam-${k}-v`).textContent = (+sc.lambdas[k]).toFixed(1);
+  });
+}
+const onScenarioChange = debounce(() => refreshModel(), 350);
+$('#fac-table').addEventListener('input', (e) => {
+  const t = e.target; if (!t.dataset.k) return;
+  const f = S.scenario.facilities[+t.dataset.f];
+  f[t.dataset.k] = t.type === 'number' ? clampNum(t) : t.value;
+  onScenarioChange();
+});
+$('#fac-table').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-del]'); if (!b) return;
+  S.scenario.facilities.splice(+b.dataset.del, 1);
+  renderScenarioForm(); refreshModel();
+});
+$('#fac-add').addEventListener('click', () => {
+  if (S.scenario.facilities.length >= 6) return toast('At most 6 facilities: the statevector limit is 16 qubits.', true);
+  S.scenario.facilities.push({ name: `Facility ${S.scenario.facilities.length + 1}`, kind: 'clinic', demand: 2, capacity: 2, cost: 1.2, priority: 2, min_service: 0 });
+  renderScenarioForm(); refreshModel();
+});
+for (const [id, k] of [['#sc-resource', 'resource'], ['#sc-unit', 'unit_size'], ['#sc-supply', 'supply'], ['#sc-unitlabel', 'unit_label']]) {
+  $(id).addEventListener('input', (e) => { S.scenario[k] = e.target.type === 'number' ? clampNum(e.target) : e.target.value; onScenarioChange(); });
+}
+['capacity', 'demand', 'fairness', 'min_service'].forEach((k) => {
+  $(`#lam-${k}`).addEventListener('input', (e) => {
+    S.scenario.lambdas[k] = +e.target.value;
+    $(`#lam-${k}-v`).textContent = (+e.target.value).toFixed(1);
+    onScenarioChange();
+  });
+});
+$('#lam-auto').addEventListener('click', async () => {
+  const s = S.model?.suggested; if (!s) return;
+  S.scenario.lambdas.capacity = Math.min(80, s.capacity);
+  S.scenario.lambdas.min_service = Math.min(80, s.min_service);
+  renderScenarioForm(); await refreshModel();
+  toast(`Hard penalties set to ${s.capacity}: larger than the objective's maximum swing (${fmt(s.objective_swing, 1)}).`);
+});
