@@ -38,3 +38,7 @@ TERMS = ["cost", "capacity", "demand", "fairness", "min_service"]
 
 
 class QuboBuilder:
+    def __init__(self, n: int):
+        self.Q = np.zeros((n, n))  # upper triangular, diagonal = linear terms
+        self.c = 0.0
+
