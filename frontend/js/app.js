@@ -466,3 +466,4 @@ function renderBench() {
     `<tr><td colspan="11" class="muted" style="text-align:left">Seeds ${B.seeds.join(', ')} · C<sub>opt</sub> = ${fmt(B.optimum, 3)} · ${B.n_qubits} qubits · formulation ${B.formulation_valid ? 'valid ✓' : 'INVALID ✕'}</td></tr>`;
 }
 
+/* ---------------------------------------------------------- full pipeline */
