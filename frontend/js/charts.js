@@ -143,3 +143,5 @@ export function lineChart(container, { series, xLabel = '', yLabel = '', yMax, y
   });
   hit.addEventListener('mouseleave', () => { hideTip(); cross.setAttribute('opacity', 0); });
 }
+function range(a, b, s) { const o = []; for (let v = a; v <= b + 1e-9; v += s) o.push(v); return o; }
+
