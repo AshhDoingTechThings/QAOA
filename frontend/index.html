@@ -249,6 +249,32 @@
   </div>
 </section>
 
+<!-- ============================================================ 5 RESULTS -->
+<section class="stage" data-stage="5">
+  <div class="col">
+    <div class="panel">
+      <div class="kicker">Step 5 · Decoding &amp; validation</div>
+      <h2>Recommended allocation</h2>
+      <p>The lowest-energy measured bit-string is decoded into an allocation and <b>checked against every original constraint</b>. Pick a solver to see its plan in 3D.</p>
+      <div class="solver-pick" id="solver-pick"></div>
+    </div>
+    <div class="panel">
+      <h3 id="res-title">Constraint check</h3>
+      <div id="res-checks"></div>
+    </div>
+    <div class="panel">
+      <div class="note"><span class="who">Engineer's note</span>When the number of shots approaches 2<sup>n</sup>, simply sampling can stumble on the optimum. That is why we also report <b>P<sub>opt</sub></b> and the <b>feasible probability mass</b> compared with uniform random guessing. Those numbers show what the circuit actually learned.</div>
+    </div>
+  </div>
+  <div class="right">
+    <div class="viz h3d" id="host-city-5">
+      <div class="overlay-tl"><b id="res-ov-title">Allocation</b><br><span class="small" id="res-ov-sub"></span></div>
+    </div>
+    <div class="panel"><div class="viz-title">Units allocated per facility, by solver</div><div class="viz-sub">dashed tick = demand</div><div class="chart" id="ch-alloc"></div></div>
+    <div class="panel"><div class="viz-title">Solver comparison: same instance, same conditions</div><div class="table-wrap"><table class="data" id="cmp-table"></table></div></div>
+  </div>
+</section>
+
 </main>
 </body>
 </html>
