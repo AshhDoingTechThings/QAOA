@@ -467,3 +467,27 @@ function renderBench() {
 }
 
 /* ---------------------------------------------------------- full pipeline */
+async function runAll() {
+  if (S.busy) return;
+  S.busy = true;
+  const btn = $('#run-all'); btn.disabled = true;
+  try {
+    setStage(1); await sleep(1600);
+    setStage(2); markDone(1); await sleep(1600);
+    setStage(3); markDone(2); await sleep(1600);
+    markDone(3);
+    setStage(4);
+    await runQAOA();
+    await sleep(500);
+    $('#evo-play').click();
+    if (!S.sa) await runSA();
+    await sleep(2500);
+    if (evoTimer) { clearInterval(evoTimer); evoTimer = null; $('#evo-play').textContent = '▶'; }
+    S.sel = 'qaoa';
+    setStage(5); markDone(5);
+    renderResults();
+    toast('Pipeline complete. Open step 6 to run the multi-seed benchmark.');
+  } finally { S.busy = false; btn.disabled = false; }
+}
+$('#run-all').addEventListener('click', runAll);
+
