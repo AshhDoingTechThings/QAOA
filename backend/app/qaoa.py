@@ -284,3 +284,20 @@ def _transpiled_stats_cached(key, n, p, qasm_str):
     return out
 
 
+def circuit_report(model: Model, params, p):
+    sim = QAOASim(model)
+    n_h = int((np.abs(model.h) > 1e-12).sum())
+    rep = {"n_qubits": model.n_qubits, "p": p,
+           "analytic": analytic_circuit_stats(model.n_qubits, sim.edges, n_h, p),
+           "n_zz_terms": len(sim.edges), "n_z_terms": n_h, "qiskit": HAVE_QISKIT}
+    if HAVE_QISKIT:
+        qc = build_qiskit_circuit(model, params, p)
+        qasm = qasm2.dumps(qc)
+        rep["qasm"] = qasm
+        try:
+            rep["transpiled"] = _transpiled_stats_cached(hash(qasm), model.n_qubits, p, qasm)
+        except Exception as e:  # pragma: no cover
+            rep["transpiled_error"] = str(e)
+    return rep
+
+
