@@ -51,3 +51,58 @@ class Scenario(BaseModel):
         return v
 
 
+def _f(name, kind, d, c, cost, pr, m):
+    return Facility(name=name, kind=kind, demand=d, capacity=c, cost=cost, priority=pr, min_service=m)
+
+
+PRESETS = {
+    "ventilators": Scenario(
+        name="Ventilator distribution",
+        resource="Ventilators", unit_size=5, unit_label="ventilators",
+        supply=6,
+        description="A regional health authority has 6 batches of ventilators (30 devices) "
+                    "for 4 facilities whose combined demand is 10 batches. Who gets what?",
+        facilities=[
+            _f("City General", "hospital", 3, 3, 1.0, 3.0, 1),
+            _f("Rural Health Centre", "rural", 2, 2, 2.0, 2.0, 1),
+            _f("Children's Hospital", "children", 2, 3, 1.5, 3.0, 0),
+            _f("Trauma Centre", "trauma", 3, 2, 1.2, 2.5, 1),
+        ],
+    ),
+    "pandemic": Scenario(
+        name="Pandemic surge — ICU beds",
+        resource="ICU beds", unit_size=4, unit_label="ICU beds",
+        supply=7,
+        description="Surge planning: 7 blocks of mobile ICU beds across 5 facilities under "
+                    "capacity limits and minimum-service guarantees.",
+        facilities=[
+            _f("Metro Hospital", "hospital", 3, 3, 1.0, 3.0, 1),
+            _f("North Clinic", "clinic", 2, 2, 1.4, 1.5, 0),
+            _f("Children's Hospital", "children", 2, 2, 1.6, 2.5, 1),
+            _f("Trauma Centre", "trauma", 3, 3, 1.1, 3.0, 1),
+            _f("Valley Rural Unit", "rural", 2, 1, 2.2, 2.0, 0),
+        ],
+    ),
+    "nurses": Scenario(
+        name="Nurse shift allocation",
+        resource="Nurses", unit_size=3, unit_label="nurses / shift",
+        supply=5,
+        description="5 nurse teams (15 nurses) for the night shift across 3 wards.",
+        facilities=[
+            _f("Emergency Ward", "trauma", 3, 3, 1.0, 3.0, 1),
+            _f("Paediatrics", "children", 2, 2, 1.2, 2.0, 1),
+            _f("General Ward", "hospital", 2, 3, 0.8, 1.5, 0),
+        ],
+    ),
+    "validation": Scenario(
+        name="Small validation instance",
+        resource="Funds", unit_size=1, unit_label="× ₹10 lakh",
+        supply=3,
+        description="Tiny 8-qubit instance used to validate the formulation by exact enumeration.",
+        facilities=[
+            _f("District Hospital", "hospital", 2, 2, 1.0, 2.0, 1),
+            _f("PHC Village A", "rural", 2, 2, 1.5, 2.5, 0),
+            _f("Urban Clinic", "clinic", 1, 2, 0.8, 1.0, 0),
+        ],
+    ),
+}
