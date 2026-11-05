@@ -220,3 +220,8 @@ function renderValidity() {
   b.innerHTML = ex.formulation_valid ? '✓ QUBO ground state = feasible optimum' : '✕ QUBO ground state is infeasible: increase λ₁/λ₄';
 }
 
+/* ------------------------------------------------------------------ QAOA */
+['q-p', 'q-alpha', 'q-e1', 'q-e2', 'q-ro'].forEach((id) => {
+  const inp = $('#' + id);
+  inp.addEventListener('input', () => { $(`#${id}-v`).textContent = id === 'q-p' ? inp.value : (+inp.value).toFixed(id === 'q-alpha' ? 2 : 3); });
+});
