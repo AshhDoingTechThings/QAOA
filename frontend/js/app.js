@@ -314,3 +314,29 @@ function renderQAOA() {
   $('#evo-step').value = ev.length - 1;
   showEvo(ev.length - 1);
 }
+function showEvo(i) {
+  const ev = S.qaoa?.evolution; if (!ev) return;
+  ising.setBloch(ev[i].bloch);
+  $('#evo-label').textContent = `${i}/${ev.length - 1} · ${ev[i].label} · ⟨H_C⟩ = ${fmt(ev[i].exp, 2)}`;
+}
+$('#evo-step').addEventListener('input', (e) => showEvo(+e.target.value));
+let evoTimer = null;
+$('#evo-play').addEventListener('click', () => {
+  if (!S.qaoa) return toast('Run QAOA first (step 4).');
+  if (evoTimer) { clearInterval(evoTimer); evoTimer = null; $('#evo-play').textContent = '▶'; return; }
+  let i = 0; showEvo(0); $('#evo-step').value = 0; $('#evo-play').textContent = '❚❚';
+  evoTimer = setInterval(() => {
+    i++;
+    if (i >= S.qaoa.evolution.length) { clearInterval(evoTimer); evoTimer = null; $('#evo-play').textContent = '▶'; return; }
+    $('#evo-step').value = i; showEvo(i);
+  }, 1100);
+});
+$('#q-qasm').addEventListener('click', () => {
+  const q = S.qaoa?.circuit?.qasm; if (!q) return;
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([q], { type: 'text/plain' }));
+  a.download = `qaoa_p${S.qaoa.p}_${S.model.n_qubits}q.qasm`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+
