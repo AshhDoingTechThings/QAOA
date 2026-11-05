@@ -69,3 +69,13 @@ class QAOASim:
     def expectation(self, probs):
         return float(probs @ self.E)
 
+    def cvar(self, probs, alpha):
+        p = probs[self.order]
+        e = self.E[self.order]
+        cum = np.cumsum(p)
+        k = int(np.searchsorted(cum, alpha))
+        k = min(k, len(p) - 1)
+        mass_before = cum[k - 1] if k > 0 else 0.0
+        val = (p[:k] @ e[:k]) + (alpha - mass_before) * e[k]
+        return float(val / alpha)
+
