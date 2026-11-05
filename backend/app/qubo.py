@@ -186,3 +186,17 @@ def objective_of_alloc(sc: Scenario, alloc) -> Dict[str, float]:
     return {"cost": cost, "unmet_weighted": unmet, "fairness": fair, "objective": total}
 
 
+def check_constraints(sc: Scenario, alloc) -> List[Dict]:
+    checks = []
+    for f, a in zip(sc.facilities, alloc):
+        checks.append({"type": "capacity", "facility": f.name, "ok": a <= f.capacity,
+                       "detail": f"{a} ≤ {f.capacity}"})
+    for f, a in zip(sc.facilities, alloc):
+        checks.append({"type": "min_service", "facility": f.name, "ok": a >= f.min_service,
+                       "detail": f"{a} ≥ {f.min_service}"})
+    tot = sum(alloc)
+    checks.append({"type": "supply", "facility": "All", "ok": tot <= sc.supply,
+                   "detail": f"Σ = {tot} ≤ {sc.supply}"})
+    return checks
+
+
