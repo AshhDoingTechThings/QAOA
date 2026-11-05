@@ -78,4 +78,16 @@ export class Viewport {
     });
   }
 
+  mount(host) {
+    if (this.host === host) return;
+    if (this.host) { this.ro.unobserve(this.host); this.io.unobserve(this.host); }
+    this.host = host;
+    host.prepend(this.labels.domElement);
+    host.prepend(this.renderer.domElement);
+    this.ro.observe(host);
+    this.io.observe(host);
+    this.resize();
+    this._kick();
+  }
+
 }
