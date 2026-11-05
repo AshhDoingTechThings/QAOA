@@ -340,3 +340,4 @@ $('#q-qasm').addEventListener('click', () => {
   URL.revokeObjectURL(a.href);
 });
 
+/* --------------------------------------------------------------- results */
