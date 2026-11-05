@@ -85,4 +85,15 @@ export class LandscapeScene {
     const lm = label('grid min', 'label3d axis'); lm.position.copy(m).add(new THREE.Vector3(0, -0.45, 0)); this.g.add(lm);
   }
 
+  toWorld(g, b, z) {
+    const L = this.L;
+    const g0 = L.gammas[0], g1 = L.gammas[L.gammas.length - 1];
+    const b0 = L.betas[0], b1 = L.betas[L.betas.length - 1];
+    const x = ((g - g0) / (g1 - g0) - 0.5) * W;
+    // PlaneGeometry rows run from +D/2 (row 0) … after rotateX(-π/2) row 0 sits at z = −D/2·(−1)… compute empirically:
+    const zc = (0.5 - (b - b0) / (b1 - b0)) * D * -1;
+    const y = hScale((z - L.min) / ((L.max - L.min) || 1)) * HMAX;
+    return new THREE.Vector3(x, y, zc);
+  }
+
 }
