@@ -98,3 +98,10 @@ class Model:
             self._energies = qubo_energy_all(self.Q, self.const, self.bits)
         return self._energies
 
+    # ---------------- decoding ------------------------------------------
+    def decode(self, index: int) -> Dict:
+        x = [(index >> i) & 1 for i in range(self.n_qubits)]
+        alloc = [x[2 * f] + 2 * x[2 * f + 1] for f in range(self.n_fac)]
+        slack = sum(x[2 * self.n_fac + j] << j for j in range(self.n_slack))
+        return {"x": x, "alloc": alloc, "slack": slack}
+
