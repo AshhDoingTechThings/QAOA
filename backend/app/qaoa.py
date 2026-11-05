@@ -65,3 +65,7 @@ class QAOASim:
             psi = self.mixer(psi, b[k])
         return psi
 
+    # ------------------------------------------------------------ objectives
+    def expectation(self, probs):
+        return float(probs @ self.E)
+
