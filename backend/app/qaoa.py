@@ -301,3 +301,16 @@ def circuit_report(model: Model, params, p):
     return rep
 
 
+def qiskit_crosscheck(model: Model, params, p) -> Optional[Dict]:
+    if not HAVE_QISKIT:
+        return None
+    sim = QAOASim(model)
+    psi = sim.state(np.asarray(params), p)
+    t0 = time.perf_counter()
+    sv = Statevector(build_qiskit_circuit(model, params, p, measure=False)).data
+    rt = time.perf_counter() - t0
+    fid = float(abs(np.vdot(sv, psi)) ** 2)
+    return {"fidelity": fid, "max_prob_diff": float(np.abs(np.abs(sv) ** 2 - np.abs(psi) ** 2).max()),
+            "qiskit_ms": 1000 * rt}
+
+
