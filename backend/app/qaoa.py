@@ -183,3 +183,11 @@ class QAOASim:
         probs /= probs.sum()
         return np.bincount(rng.choice(self.N, size=shots, p=probs), minlength=self.N)
 
+    def _pauli(self, psi, q, which):
+        v = psi.reshape(self.N >> (q + 1), 2, 1 << q)
+        if which in (2, 3):  # Z (Y = iXZ up to global phase)
+            v[:, 1, :] *= -1
+        if which in (1, 3):  # X
+            v[:, [0, 1], :] = v[:, [1, 0], :]
+        return psi
+
