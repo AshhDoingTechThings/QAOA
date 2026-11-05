@@ -47,3 +47,13 @@ class QAOASim:
                       if abs(model.J[i, j]) > 1e-12]
         self.n_evals = 0
 
+    # ---------------------------------------------------------------- state
+    def mixer(self, psi, beta):
+        c, s = math.cos(beta), -1j * math.sin(beta)
+        for q in range(self.n):
+            v = psi.reshape(self.N >> (q + 1), 2, 1 << q)
+            a, b = v[:, 0, :].copy(), v[:, 1, :]
+            v[:, 0, :] = c * a + s * b
+            v[:, 1, :] = s * a + c * b
+        return psi
+
