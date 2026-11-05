@@ -191,4 +191,57 @@ export class SkylineScene {
 
   mount(host) { this.vp.mount(host); }
 
+  /** rows: [{name, color, dist:[{alloc,prob,feasible,optimal,bitstring,energy}]}] */
+  setData(rows, scenario, optAlloc) {
+    this.vp.clearGroup(this.g);
+    this.vp.pickables = [];
+    this.grow = [];
+    const keys = [];
+    rows.forEach((r) => r.dist.forEach((d) => { if (!keys.includes(d.bitstring)) keys.push(d.bitstring); }));
+    // order by ideal probability
+    const first = new Map(rows[0].dist.map((d) => [d.bitstring, d.prob]));
+    keys.sort((a, b) => (first.get(b) || 0) - (first.get(a) || 0));
+    const K = Math.min(keys.length, 20);
+    const maxP = Math.max(...rows.flatMap((r) => r.dist.map((d) => d.prob)), 1e-9);
+    const spacing = 0.75, x0 = -((K - 1) * spacing) / 2;
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(K * spacing + 2, rows.length * 1.6 + 1.5),
+      new THREE.MeshStandardMaterial({ color: 0x0f1320, roughness: 0.9 }));
+    floor.rotation.x = -Math.PI / 2;
+    floor.position.z = -((rows.length - 1) * 1.6) / 2;
+    this.g.add(floor);
+    rows.forEach((r, ri) => {
+      const map = new Map(r.dist.map((d) => [d.bitstring, d]));
+      const z = -ri * 1.6;
+      const lb = label(`<b>${r.name}</b>`, 'label3d'); lb.position.set(x0 - 1.6, 0.3, z); this.g.add(lb);
+      keys.slice(0, K).forEach((k, i) => {
+        const d = map.get(k);
+        if (!d) return;
+        const h = Math.max(0.03, (d.prob / maxP) * 5);
+        const geo = new THREE.BoxGeometry(0.55, 1, 0.55);
+        geo.translate(0, 0.5, 0);
+        const col = new THREE.Color(r.color);
+        const mat = d.feasible
+          ? new THREE.MeshStandardMaterial({ color: col, emissive: col, emissiveIntensity: 0.25, roughness: 0.4 })
+          : new THREE.MeshStandardMaterial({ color: col, transparent: true, opacity: 0.22, roughness: 0.6, depthWrite: false });
+        const bar = new THREE.Mesh(geo, mat);
+        bar.position.set(x0 + i * spacing, 0, z);
+        bar.scale.y = 0.001;
+        bar.userData = { ...d, row: r.name, scenario };
+        this.g.add(bar);
+        this.vp.pickables.push(bar);
+        this.grow.push({ bar, h, t: -i * 0.03 });
+        if (!d.feasible) {
+          const e = new THREE.LineSegments(new THREE.EdgesGeometry(geo), new THREE.LineBasicMaterial({ color: col, transparent: true, opacity: 0.8 }));
+          bar.add(e);
+        }
+        if (d.feasible && sameAlloc(d.alloc, optAlloc)) {
+          const s = label('★', 'label3d axis');
+          s.element.style.color = '#ffd36b'; s.element.style.fontSize = '16px';
+          s.position.set(0, 1.12, 0);
+          bar.add(s);
+        }
+      });
+    });
+  }
+
 }
