@@ -41,6 +41,53 @@
 </nav>
 
 <main>
+<!-- ============================================================ 0 OVERVIEW -->
+<section class="stage active" data-stage="0">
+  <div class="col">
+    <div class="panel">
+      <div class="kicker">Problem statement</div>
+      <h2>Scarce resources, many hospitals, hard constraints</h2>
+      <p>Hospitals must share limited <b>beds, staff, equipment and funds</b> while respecting demand, capacity, cost, priority, fairness and minimum service.</p>
+      <p>The number of possible allocations grows <b>exponentially</b>: with 2 qubits per facility, 10 facilities already give 2<sup>20</sup> ≈ 10<sup>6</sup> bit-strings. Manual or rule-based planning is slow and often sub-optimal.</p>
+      <div class="note"><span class="who">Engineer's note</span>Most QAOA papers solve <b>unconstrained toy problems</b> (MaxCut) and never compare against classical solvers fairly. This framework encodes <b>real constraints</b>, solves the <b>same instance</b> classically and with QAOA, and reports quality, feasibility, runtime, stability, qubits and depth. <b>We do not claim quantum advantage.</b></div>
+    </div>
+    <div class="panel">
+      <h3>Pipeline (block diagram)</h3>
+      <div class="flow" id="flow">
+        <div class="node" data-go="1"><span class="i">1</span>Healthcare scenario input</div>
+        <div class="arrow-down">↓</div>
+        <div class="node" data-go="2"><span class="i">2</span>Mathematical model (objective + constraints) → QUBO</div>
+        <div class="arrow-down">↓</div>
+        <div class="node" data-go="3"><span class="i">3</span>Ising Hamiltonian conversion</div>
+        <div class="arrow-down">↓</div>
+        <div class="branch">
+          <div class="node" data-go="5">Exact enumeration</div>
+          <div class="node" data-go="5">Classical baseline</div>
+          <div class="node" data-go="4">QAOA (Qiskit)</div>
+        </div>
+        <div class="arrow-down">↓</div>
+        <div class="node" data-go="6"><span class="i">6</span>Benchmarking → interactive dashboard</div>
+      </div>
+    </div>
+    <div class="panel">
+      <h3>How to demo</h3>
+      <ul>
+        <li>Choose a preset at the top, then press <b>▶ Run full pipeline</b>.</li>
+        <li>Step through with the pipeline bar or the <span class="kbd">←</span> <span class="kbd">→</span> keys.</li>
+        <li>Drag any 3D view to orbit. Click it, then scroll to zoom. Hover over items for details.</li>
+      </ul>
+      <p class="small muted">Under the guidance of Dr K Venkata Subba Reddy · Namani Yashaswini (23911A3541) · Syed Asif (23911A3559)</p>
+    </div>
+  </div>
+  <div class="right">
+    <div class="viz h3d" id="host-city-0">
+      <div class="overlay-tl"><b id="ov-title">Scenario</b><br><span id="ov-sub"></span></div>
+      <div class="overlay-br">drag to orbit · click, then scroll to zoom</div>
+    </div>
+    <div class="kpis" id="ov-kpis"></div>
+  </div>
+</section>
+
 </main>
 </body>
 </html>
