@@ -171,3 +171,20 @@ async function refreshModel() {
   }
 }
 
+function renderOverview() {
+  const sc = S.scenario, m = S.model, ex = S.exact;
+  const D = sc.facilities.reduce((a, f) => a + f.demand, 0);
+  $('#ov-title').textContent = sc.name;
+  $('#ov-sub').textContent = sc.description || '';
+  const tiles = [
+    kpi('Stock vs demand', `${sc.supply} / ${D}`, `${sc.supply * sc.unit_size} ${esc(sc.unit_label)} for ${D * sc.unit_size} requested`),
+    kpi('Facilities', sc.facilities.length, esc(sc.resource)),
+    kpi('Qubits', m.n_qubits, `${m.n_facility_qubits} allocation + ${m.n_slack} slack`),
+    kpi('Search space', (m.hilbert_dim).toLocaleString(), 'bit-strings (2ⁿ)'),
+  ];
+  if (ex) tiles.push(kpi('Feasible plans', ex.n_feasible_allocations, `of ${Math.pow(4, sc.facilities.length)} allocations`));
+  $('#ov-kpis').innerHTML = tiles.join('');
+  $('#sc-kpis').innerHTML = tiles.join('');
+  $('#sc-size').textContent = `${m.n_qubits} qubits · ${m.hilbert_dim.toLocaleString()} states`;
+}
+
