@@ -105,3 +105,8 @@ class Model:
         slack = sum(x[2 * self.n_fac + j] << j for j in range(self.n_slack))
         return {"x": x, "alloc": alloc, "slack": slack}
 
+    def bitstring(self, index: int) -> str:
+        # Qiskit convention: q_{n-1} … q_0
+        return format(index, f"0{self.n_qubits}b")
+
+
