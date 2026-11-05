@@ -191,3 +191,46 @@ class QAOASim:
             v[:, [0, 1], :] = v[:, [1, 0], :]
         return psi
 
+    def noisy_counts(self, params, p, shots, rng, e1=0.001, e2=0.01, ro=0.02, trajectories=64):
+        deg = np.zeros(self.n)
+        for i, j, _ in self.edges:
+            deg[i] += 1
+            deg[j] += 1
+        has_h = np.abs(self.m.h) > 1e-12
+        p_cost = 1 - (1 - e2) ** deg * (1 - e1) ** has_h
+        p_mix = np.full(self.n, e1)
+        g, b = params[:p], params[p:]
+        counts = np.zeros(self.N, dtype=np.int64)
+        per = np.full(trajectories, shots // trajectories)
+        per[: shots % trajectories] += 1
+        exp_sum = 0.0
+
+        def inject(psi, probs_q):
+            hit = rng.random(self.n) < probs_q
+            for q in np.nonzero(hit)[0]:
+                psi = self._pauli(psi, q, int(rng.integers(1, 4)))
+            return psi
+
+        for t in range(trajectories):
+            psi = np.full(self.N, 1 / math.sqrt(self.N), dtype=np.complex128)
+            psi = inject(psi, p_mix)  # Hadamard layer
+            for k in range(p):
+                psi *= np.exp(-1j * g[k] * self.Hn)
+                psi = inject(psi, p_cost)
+                psi = self.mixer(psi, b[k])
+                psi = inject(psi, p_mix)
+            probs = np.abs(psi) ** 2
+            exp_sum += probs @ self.E * per[t]
+            if per[t] == 0:
+                continue
+            idx = rng.choice(self.N, size=int(per[t]), p=probs / probs.sum())
+            if ro > 0:
+                flips = rng.random((idx.size, self.n)) < ro
+                idx = idx ^ (flips * (1 << np.arange(self.n))).sum(axis=1)
+            counts += np.bincount(idx, minlength=self.N)
+        n2 = len(self.edges) * p
+        n1 = self.n + p * (int(has_h.sum()) + self.n)
+        fidelity = (1 - e2) ** n2 * (1 - e1) ** n1 * (1 - ro) ** self.n
+        return counts, exp_sum / shots, fidelity
+
+
