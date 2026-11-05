@@ -275,6 +275,44 @@
   </div>
 </section>
 
+<!-- ============================================================ 6 BENCHMARK -->
+<section class="stage" data-stage="6">
+  <div class="col">
+    <div class="panel">
+      <div class="kicker">Step 6 · Benchmarking</div>
+      <h2>Transparent, reproducible comparison</h2>
+      <div class="eq">Gap = (C<sub>solver</sub> − C<sub>opt</sub>) / C<sub>opt</sub> × 100</div>
+      <div class="eq">r = C<sub>opt</sub> / C<sub>QAOA</sub>&nbsp;&nbsp;·&nbsp;&nbsp;P<sub>opt</sub> = shots<sub>opt</sub> / shots</div>
+      <ul class="small">
+        <li><b>Stability</b> is the standard deviation across seeds and initial angles.</li>
+        <li><b>Feasibility rate</b> is the share of measured shots that satisfy every constraint.</li>
+        <li><b>Depth / CX</b> come from the Qiskit transpiler, with all-to-all and linear connectivity.</li>
+      </ul>
+      <div class="field"><label>Seeds</label><select id="b-seeds"><option value="1">1</option><option value="3" selected>3</option><option value="5">5</option></select></div>
+      <div class="field"><label>QAOA depths</label><div class="seg" id="b-p"><button data-v="1" class="on">p=1</button><button data-v="2" class="on">p=2</button><button data-v="3" class="on">p=3</button><button data-v="4">p=4</button></div></div>
+      <label class="toggle"><input type="checkbox" id="b-noise" checked> Include the noisy simulator (uses step 4's noise settings)</label>
+      <div class="row" style="margin-top:10px"><button class="btn primary" id="b-run">Run benchmark</button><span class="small muted" id="b-status"></span></div>
+    </div>
+    <div class="panel">
+      <div class="note"><span class="who">Engineer's note</span>Read the numbers honestly. On instances this small, exact enumeration and annealing are faster and more reliable. QAOA's value here is a <b>measured, reproducible baseline</b>: how feasibility and P<sub>opt</sub> grow with depth p, and how noise and the CX count grow with it. That shows when hardware would need to improve before QAOA becomes competitive.</div>
+    </div>
+  </div>
+  <div class="right">
+    <div class="grid2">
+      <div class="panel"><div class="viz-title">Solution quality</div><div class="viz-sub">approximation ratio r (1 = optimum), mean ± std over seeds</div><div class="chart" id="ch-ratio"></div></div>
+      <div class="panel"><div class="viz-title">Feasibility rate of measured shots</div><div class="viz-sub">compared with uniform random sampling (dashed)</div><div class="chart" id="ch-feas"></div></div>
+      <div class="panel"><div class="viz-title">Probability of the optimal allocation</div><div class="viz-sub">P<sub>opt</sub> by depth p</div><div class="chart" id="ch-popt"></div></div>
+      <div class="panel"><div class="viz-title">Transpiled circuit depth</div><div class="viz-sub">all-to-all compared with linear qubit connectivity</div><div class="chart" id="ch-depth"></div></div>
+      <div class="panel"><div class="viz-title">Wall-clock runtime</div><div class="viz-sub">milliseconds, including QAOA's classical optimisation loop</div><div class="chart" id="ch-time"></div></div>
+      <div class="panel"><div class="viz-title">Qubit requirement as facilities grow</div><div class="viz-sub">2 qubits per facility plus slack qubits</div><div class="chart" id="ch-scale"></div></div>
+    </div>
+    <div class="panel"><div class="viz-title">Benchmark table</div><div class="table-wrap"><table class="data" id="b-table"><tr><td class="muted">Run the benchmark to fill the table.</td></tr></table></div></div>
+  </div>
+</section>
 </main>
+
+<div class="tooltip" id="tooltip"></div>
+<div class="toast" id="toast"></div>
+<script type="module" src="/static/js/app.js"></script>
 </body>
 </html>
