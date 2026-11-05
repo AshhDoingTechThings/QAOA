@@ -422,3 +422,47 @@ function rowColor(key) {
   if (key === 'sa') return SOLVERS.sa.color;
   return key.endsWith('n') ? SOLVERS.qaoan.color : SOLVERS.qaoa.color;
 }
+function renderBench() {
+  const B = S.bench, rows = B.rows;
+  const legendItems = [SOLVERS.qaoa, SOLVERS.qaoan, SOLVERS.sa, SOLVERS.greedy, SOLVERS.exact].filter((s) => rows.some((r) => rowColor(r.key) === s.color));
+  const short = (r) => r.key === 'exact' ? 'Exact' : r.key === 'greedy' ? 'Greedy' : r.key === 'sa' ? 'SA' : `p${r.p}${r.key.endsWith('n') ? '·noisy' : ''}`;
+  barChart($('#ch-ratio'), {
+    categories: rows.map(short), legendItems,
+    series: [{ name: 'r', names: rows.map((r) => r.solver), colors: rows.map((r) => rowColor(r.key)), values: rows.map((r) => r.approx_ratio.mean), errors: rows.map((r) => r.approx_ratio.std),
+      notes: rows.map((r) => `found optimum in ${pct(r.found_optimum_rate, 0)} of runs`) }],
+    yMax: 1, yFormat: (v) => fmt(v, 2), height: 230,
+  });
+  barChart($('#ch-time'), {
+    categories: rows.map(short), legendItems,
+    series: [{ name: 'ms', names: rows.map((r) => r.solver), colors: rows.map((r) => rowColor(r.key)), values: rows.map((r) => r.runtime_ms.mean), errors: rows.map((r) => r.runtime_ms.std) }],
+    yFormat: (v) => fmt(v, 0), unit: ' ms', height: 230,
+  });
+  const q = rows.filter((r) => r.key.startsWith('qaoa') && !r.key.endsWith('n'));
+  const qn = rows.filter((r) => r.key.endsWith('n'));
+  const uniformFeas = S.exact ? S.exact.n_feasible_states / S.exact.n_states : null;
+  const xs = q.map((r) => r.p);
+  const feasSeries = [{ name: 'QAOA ideal', color: SOLVERS.qaoa.color, points: q.map((r) => [r.p, r.feasibility_rate.mean]) }];
+  if (qn.length) feasSeries.push({ name: 'QAOA noisy', color: SOLVERS.qaoan.color, points: qn.map((r) => [r.p, r.feasibility_rate.mean]) });
+  if (uniformFeas !== null) feasSeries.push({ name: 'uniform random', color: MUTED, dashed: true, markers: false, points: xs.map((p) => [p, uniformFeas]) });
+  lineChart($('#ch-feas'), { series: feasSeries, xLabel: 'QAOA depth p', xTicks: xs, yFormat: (v) => pct(v, 0), yMin: 0, height: 220 });
+  const poptSeries = [{ name: 'QAOA ideal', color: SOLVERS.qaoa.color, points: q.map((r) => [r.p, r.p_opt.mean]) }];
+  if (qn.length) poptSeries.push({ name: 'QAOA noisy', color: SOLVERS.qaoan.color, points: qn.map((r) => [r.p, r.p_opt.mean]) });
+  if (S.model) poptSeries.push({ name: 'uniform random', color: MUTED, dashed: true, markers: false, points: xs.map((p) => [p, Math.pow(2, S.model.n_slack) / S.model.hilbert_dim]) });
+  lineChart($('#ch-popt'), { series: poptSeries, xLabel: 'QAOA depth p', xTicks: xs, yFormat: (v) => pct(v, 2), yMin: 0, height: 220 });
+  const dSeries = [{ name: 'all-to-all', color: '#3987e5', points: q.map((r) => [r.p, r.depth]) }];
+  if (q[0] && q[0].depth_linear) dSeries.push({ name: 'linear chain', color: '#9085e9', points: q.map((r) => [r.p, r.depth_linear]) });
+  lineChart($('#ch-depth'), { series: dSeries, xLabel: 'QAOA depth p', xTicks: xs, yFormat: (v) => fmt(v, 0), yMin: 0, height: 220 });
+  const sc = B.scaling;
+  lineChart($('#ch-scale'), {
+    series: [{ name: 'qubits needed', color: '#3987e5', points: sc.map((s) => [s.facilities, s.qubits]) },
+      { name: 'exact-simulation limit (16)', color: MUTED, dashed: true, markers: false, points: sc.map((s) => [s.facilities, 16]) }],
+    xLabel: 'facilities', yFormat: (v) => fmt(v, 0), yMin: 0, height: 220,
+  });
+  $('#b-table').innerHTML = `<tr><th>Solver</th><th>Objective (mean ± std)</th><th>r</th><th>Gap</th><th>Optimum found</th><th>Feasible shots</th><th>P<sub>opt</sub></th><th>Runtime</th><th>Qubits</th><th>Depth (a2a / linear)</th><th>CX (a2a / linear)</th></tr>` +
+    rows.map((r) => `<tr><td><span class="swatch" style="background:${rowColor(r.key)}"></span>${r.solver}</td>
+      <td>${fmt(r.objective.mean, 2)} ± ${fmt(r.objective.std, 2)}</td><td>${fmt(r.approx_ratio.mean, 3)}</td><td>${r.gap_pct.mean !== null ? fmt(r.gap_pct.mean, 1) + '%' : '—'}</td>
+      <td>${pct(r.found_optimum_rate, 0)}</td><td>${r.feasibility_rate ? pct(r.feasibility_rate.mean) : '—'}</td><td>${r.p_opt ? pct(r.p_opt.mean, 2) : '—'}</td>
+      <td>${fmt(r.runtime_ms.mean, 1)} ms</td><td>${r.qubits ?? '—'}</td><td>${r.depth ? `${r.depth} / ${r.depth_linear ?? '—'}` : '—'}</td><td>${r.cx ? `${r.cx} / ${r.cx_linear ?? '—'}` : '—'}</td></tr>`).join('') +
+    `<tr><td colspan="11" class="muted" style="text-align:left">Seeds ${B.seeds.join(', ')} · C<sub>opt</sub> = ${fmt(B.optimum, 3)} · ${B.n_qubits} qubits · formulation ${B.formulation_valid ? 'valid ✓' : 'INVALID ✕'}</td></tr>`;
+}
+
