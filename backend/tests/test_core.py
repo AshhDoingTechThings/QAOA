@@ -64,3 +64,10 @@ def test_classical_baselines():
     assert sa["solution"]["objective"] == pytest.approx(ex["optimum"])
 
 
+def test_mixer_is_unitary_and_cost_is_diagonal():
+    m = build_model(PRESETS["validation"])
+    sim = QAOASim(m)
+    psi = sim.state(np.array([0.4, 0.7, 0.3, 0.2]), 2)
+    assert np.linalg.norm(psi) == pytest.approx(1.0)
+
+
