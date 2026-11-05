@@ -33,3 +33,13 @@ class Lambdas(BaseModel):
     min_service: float = Field(default=12.0, ge=0)  # λ4  hard: minimum service guarantee
 
 
+class Scenario(BaseModel):
+    name: str = "Custom scenario"
+    resource: str = "Ventilators"
+    unit_size: int = Field(default=1, ge=1, le=1000)
+    unit_label: str = "ventilators"
+    supply: int = Field(ge=0, le=24)
+    facilities: List[Facility]
+    lambdas: Lambdas = Lambdas()
+    description: Optional[str] = None
+
