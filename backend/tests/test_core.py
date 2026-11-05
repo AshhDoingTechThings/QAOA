@@ -15,3 +15,14 @@ from app.solvers import encode_alloc, exact, greedy, simulated_annealing
 PRESET_KEYS = list(PRESETS)
 
 
+@pytest.mark.parametrize("key", PRESET_KEYS)
+def test_qubo_energy_equals_objective_on_feasible_encodings(key):
+    m = build_model(PRESETS[key])
+    import itertools
+    for alloc in itertools.product(range(4), repeat=m.n_fac):
+        if not is_feasible(m.scenario, alloc):
+            continue
+        idx = encode_alloc(m, alloc)
+        assert m.energies[idx] == pytest.approx(objective_of_alloc(m.scenario, alloc)["objective"], abs=1e-9)
+
+
