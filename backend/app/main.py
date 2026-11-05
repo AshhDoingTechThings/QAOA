@@ -120,3 +120,10 @@ def solve_greedy(sc: Scenario):
     return greedy(m, _exact(m)["optimum"])
 
 
+@app.post("/api/solve/sa")
+def solve_sa(r: SAReq):
+    m = _model(r.scenario)
+    return simulated_annealing(m, seed=r.seed, sweeps=r.sweeps, restarts=r.restarts,
+                               optimum=_exact(m)["optimum"])
+
+
