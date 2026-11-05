@@ -299,3 +299,16 @@ table.fac td { padding: 4px 4px; }
   .stage[data-stage="0"] .right, .stage[data-stage="5"] .right { order: -1; }
   .grid3 { grid-template-columns: 1fr 1fr; }
 }
+@media (max-width: 720px) {
+  main { padding: 12px 16px 32px; }
+  .topbar { padding: 8px 16px; flex-wrap: wrap; }
+  .brand p { display: none; }
+  .topbar select { flex: 1 1 160px; }
+  .field { grid-template-columns: 1fr; }
+  .stage.active { gap: 14px; }
+  .pipeline { padding: 10px 16px; }
+  .grid2, .grid3 { grid-template-columns: 1fr; }
+  .viz.h3d { height: 52vh; min-height: 320px; }
+  .slider-row { grid-template-columns: 96px 1fr 46px; }
+}
+
