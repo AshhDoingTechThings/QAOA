@@ -90,4 +90,18 @@ export class Viewport {
     this._kick();
   }
 
+  resize() {
+    if (!this.host) return;
+    const w = this.host.clientWidth, h = this.host.clientHeight;
+    if (!w || !h) return;
+    this.renderer.setSize(w, h);
+    this.labels.setSize(w, h);
+    this.camera.aspect = w / h;
+    // portrait screens: widen the field of view so the whole scene stays in frame
+    this.camera.fov = this.camera.aspect < 1 ? Math.min(this.baseFov * 1.7, this.baseFov / this.camera.aspect * 0.85) : this.baseFov;
+    this.camera.updateProjectionMatrix();
+  }
+
+  _kick() { if (!this._running) { this._running = true; requestAnimationFrame(this._loop); } }
+
 }
