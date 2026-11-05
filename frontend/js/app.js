@@ -255,3 +255,22 @@ async function ensureLandscape(objective, alpha) {
   } finally { $('#land-busy').classList.remove('on'); }
 }
 
+async function runQAOA() {
+  const P = qaoaParams();
+  $('#q-run').disabled = true;
+  $('#q-status').textContent = 'optimising γ, β on the simulator…';
+  try {
+    const landP = ensureLandscape(P.objective, P.alpha);
+    const r = await api('/api/solve/qaoa', { scenario: S.scenario, ...P });
+    await landP;
+    S.qaoa = r;
+    land.setPath(r.trace);
+    renderQAOA();
+    renderResults();
+    markDone(4);
+    $('#q-status').textContent = `done in ${fmt(r.runtime_ms / 1000, 2)} s`;
+  } catch (e) { toast(e.message, true); $('#q-status').textContent = ''; }
+  finally { $('#q-run').disabled = false; }
+}
+$('#q-run').addEventListener('click', runQAOA);
+
