@@ -188,3 +188,28 @@ function renderOverview() {
   $('#sc-size').textContent = `${m.n_qubits} qubits · ${m.hilbert_dim.toLocaleString()} states`;
 }
 
+function renderModel() {
+  const m = S.model;
+  $('#qubo-sub').textContent = `${m.n_qubits}×${m.n_qubits} · constant ${fmt(m.const, 2)} · build ${fmt(m.build_ms, 1)} ms`;
+  const groups = [];
+  for (let f = 0; f < m.n_facility_qubits / 2; f++) groups.push([2 * f, 2 * f + 2]);
+  if (m.n_slack) groups.push([m.n_facility_qubits, m.n_qubits]);
+  heatmap($('#qubo-canvas'), m.Q, m.labels, groups);
+  $('#register').innerHTML = m.labels.map((l, i) => {
+    const owner = m.qubit_owner[i];
+    const nm = owner >= 0 ? S.scenario.facilities[owner].name : 'stock slack';
+    return `<span class="qchip ${owner < 0 ? 'slack' : ''}" title="${esc(nm)}">q${i} ${l}</span>`;
+  }).join('');
+  const names = { cost: 'H_cost', capacity: 'λ₁ H_capacity', demand: 'λ₂ H_demand', fairness: 'λ₃ H_fairness', min_service: 'λ₄ H_min' };
+  $('#terms-table').innerHTML = `<tr><th>Term</th><th>Linear</th><th>Quadratic</th></tr>` +
+    Object.entries(m.components).map(([k, c]) => `<tr><td>${names[k]}</td><td>${c.linear}</td><td>${c.quadratic}</td></tr>`).join('');
+  $('#lam-hint').innerHTML = `Recommended hard penalty ≥ <b>${fmt(m.suggested.capacity, 1)}</b>, which exceeds the objective's maximum swing of ${fmt(m.suggested.objective_swing, 1)}. Penalties that are too small give infeasible ground states; penalties that are too large flatten the landscape QAOA has to search.`;
+  // Ising KPIs
+  $('#ising-kpis').innerHTML = [
+    kpi('Z terms', m.h.filter((h) => Math.abs(h) > 1e-12).length, 'local fields h_i'),
+    kpi('ZZ terms', m.J_edges.length, `→ ${2 * m.J_edges.length} CNOT / layer`),
+    kpi('Offset', fmt(m.offset, 1), 'constant energy'),
+    kpi('max |h|, |J|', fmt(m.max_abs_coef, 2), 'normalises γ'),
+  ].join('');
+}
+
