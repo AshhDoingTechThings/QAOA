@@ -114,3 +114,9 @@ def solve_exact(sc: Scenario):
     return _exact(_model(sc))
 
 
+@app.post("/api/solve/greedy")
+def solve_greedy(sc: Scenario):
+    m = _model(sc)
+    return greedy(m, _exact(m)["optimum"])
+
+
