@@ -341,3 +341,14 @@ $('#q-qasm').addEventListener('click', () => {
 });
 
 /* --------------------------------------------------------------- results */
+function solverResults() {
+  const out = {};
+  if (S.qaoa) {
+    out.qaoa = { sol: S.qaoa.solution, rt: S.qaoa.runtime_ms, note: `P_opt ${pct(S.qaoa.sampled.p_opt_alloc, 2)} · feasible shots ${pct(S.qaoa.sampled.feasibility_rate)}` };
+    if (S.qaoa.noisy) out.qaoan = { sol: S.qaoa.noisy.best_measured, rt: S.qaoa.runtime_ms + S.qaoa.noisy.runtime_ms, note: `P_opt ${pct(S.qaoa.noisy.p_opt_alloc, 2)} · feasible shots ${pct(S.qaoa.noisy.feasibility_rate)}` };
+  }
+  if (S.sa) out.sa = { sol: S.sa.solution, rt: S.sa.runtime_ms, note: 'best of 12 restarts' };
+  if (S.greedy) out.greedy = { sol: S.greedy.solution, rt: S.greedy.runtime_ms, note: 'priority/cost rule' };
+  if (S.exact) out.exact = { sol: S.exact.solution, rt: S.exact.runtime_ms, note: `${S.exact.n_states.toLocaleString()} states enumerated` };
+  return out;
+}
