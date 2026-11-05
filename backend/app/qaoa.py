@@ -271,3 +271,16 @@ def build_qiskit_circuit(model: Model, params, p, measure=True):
     return qc
 
 
+@lru_cache(maxsize=64)
+def _transpiled_stats_cached(key, n, p, qasm_str):
+    qc = QuantumCircuit.from_qasm_str(qasm_str)
+    out = {}
+    basis = ["cx", "rz", "sx", "x"]
+    for name, cmap in [("all_to_all", None), ("linear", CouplingMap.from_line(n))]:
+        tq = transpile(qc, basis_gates=basis, coupling_map=cmap, optimization_level=1, seed_transpiler=7)
+        ops = tq.count_ops()
+        out[name] = {"depth": int(tq.depth()), "cx": int(ops.get("cx", 0)),
+                     "size": int(tq.size()), "ops": {k: int(v) for k, v in ops.items()}}
+    return out
+
+
