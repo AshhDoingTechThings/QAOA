@@ -120,4 +120,14 @@ export class Viewport {
     requestAnimationFrame(this._loop);
   }
 
+  clearGroup(g) {
+    g.traverse((o) => {
+      if (o.geometry) o.geometry.dispose();
+      if (o.material) (Array.isArray(o.material) ? o.material : [o.material]).forEach((m) => m.dispose());
+      if (o.element && o.element.parentNode) o.element.parentNode.removeChild(o.element);
+    });
+    while (g.children.length) g.remove(g.children[0]);
+  }
 }
+
+export const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
