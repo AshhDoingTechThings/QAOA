@@ -352,3 +352,29 @@ function solverResults() {
   if (S.exact) out.exact = { sol: S.exact.solution, rt: S.exact.runtime_ms, note: `${S.exact.n_states.toLocaleString()} states enumerated` };
   return out;
 }
+function renderResults() {
+  const R = solverResults();
+  const keys = ORDER.filter((k) => R[k]);
+  if (!keys.includes(S.sel)) S.sel = keys.includes('qaoa') ? 'qaoa' : 'exact';
+  $('#solver-pick').innerHTML = keys.map((k) => `<button class="btn small ${k === S.sel ? 'on' : ''}" data-s="${k}"><span class="swatch" style="background:${SOLVERS[k].color}"></span>${SOLVERS[k].name}</button>`).join('') +
+    (R.sa ? '' : `<button class="btn small" id="run-sa">+ run simulated annealing</button>`);
+  $$('#solver-pick [data-s]').forEach((b) => b.addEventListener('click', () => { S.sel = b.dataset.s; renderResults(); showSolver(S.sel); }));
+  $('#run-sa')?.addEventListener('click', runSA);
+  if (!keys.length) return;
+  const sc = S.scenario;
+  barChart($('#ch-alloc'), {
+    categories: sc.facilities.map((f) => f.name),
+    series: keys.map((k) => ({ name: SOLVERS[k].name, color: SOLVERS[k].color, values: R[k].sol.alloc })),
+    refs: { values: sc.facilities.map((f) => f.demand) }, yMax: 3, ticks: 3, yFormat: (v) => fmt(v, 0), unit: ' units', height: 210,
+  });
+  const opt = S.exact?.optimum;
+  $('#cmp-table').innerHTML = `<tr><th>Solver</th><th>Allocation</th><th>Objective</th><th>Gap</th><th>r</th><th>Constraints</th><th>Status</th><th>Runtime</th><th>Notes</th></tr>` +
+    keys.map((k) => {
+      const s = R[k].sol;
+      return `<tr><td><span class="swatch" style="background:${SOLVERS[k].color}"></span>${SOLVERS[k].name}</td>
+        <td class="mono">[${s.alloc.join(', ')}]</td><td>${fmt(s.objective, 2)}</td>
+        <td>${s.gap_pct !== undefined ? fmt(s.gap_pct, 1) + '%' : '—'}</td><td>${s.approx_ratio !== undefined ? fmt(s.approx_ratio, 3) : '—'}</td>
+        <td>${s.constraints_satisfied}/${s.constraints_total}</td><td>${statusHTML(s.feasible)}</td>
+        <td>${fmt(R[k].rt, 1)} ms</td><td class="muted" style="text-align:left">${R[k].note}</td></tr>`;
+    }).join('') + (opt !== undefined ? `<tr><td class="muted" colspan="9" style="text-align:left">C<sub>opt</sub> = ${fmt(opt, 3)} (exact enumeration of the original constrained problem)</td></tr>` : '');
+}
