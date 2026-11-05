@@ -61,3 +61,26 @@ $$('.seg').forEach((g) => g.addEventListener('click', (e) => {
 
 /* ------------------------------------------------------------------ stages */
 const CITY_HOST = { 0: '#host-city-0', 1: '#host-city-1', 5: '#host-city-5' };
+function setStage(i) {
+  S.stage = i;
+  $$('.stage').forEach((s) => s.classList.toggle('active', +s.dataset.stage === i));
+  $$('.step').forEach((s) => s.classList.toggle('active', +s.dataset.stage === i));
+  if (CITY_HOST[i]) city.mount($(CITY_HOST[i]));
+  if (i === 5) showSolver(S.sel);
+  else if (CITY_HOST[i]) city.setAllocation(i === 0 && S.exact ? S.exact.solution.alloc : null, SOLVERS.exact.color, { animate: true });
+  tooltip.style.display = 'none';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  // charts size themselves to their container, so draw them once visible
+  requestAnimationFrame(() => {
+    if (i === 4 && S.qaoa) renderQAOA();
+    if (i === 5 && S.exact) renderResults();
+    if (i === 6 && S.bench) renderBench();
+  });
+}
+$$('.step').forEach((b) => b.addEventListener('click', () => setStage(+b.dataset.stage)));
+$$('#flow .node').forEach((n) => n.addEventListener('click', () => setStage(+n.dataset.go)));
+document.addEventListener('keydown', (e) => {
+  if (['INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+  if (e.key === 'ArrowRight') setStage(Math.min(6, S.stage + 1));
+  if (e.key === 'ArrowLeft') setStage(Math.max(0, S.stage - 1));
+});
