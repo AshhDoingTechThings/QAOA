@@ -104,4 +104,20 @@ export class Viewport {
 
   _kick() { if (!this._running) { this._running = true; requestAnimationFrame(this._loop); } }
 
+  _loop() {
+    if (!this.visible || !this.host || !this.host.offsetParent) { this._running = false; return; }
+    const dt = Math.min(this.clock.getDelta(), 0.05);
+    const t = this.clock.elapsedTime;
+    for (const u of this.updaters) u(dt, t);
+    this.controls.update();
+    if (this.onHover && this.pickables.length) {
+      this.raycaster.setFromCamera(this.pointer, this.camera);
+      const hit = this.raycaster.intersectObjects(this.pickables, false)[0];
+      this.onHover(hit ? { object: hit.object, client: this._pointerClient } : null);
+    }
+    this.renderer.render(this.scene, this.camera);
+    this.labels.render(this.scene, this.camera);
+    requestAnimationFrame(this._loop);
+  }
+
 }
