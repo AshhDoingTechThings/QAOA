@@ -95,3 +95,14 @@ def run_benchmark(model: Model, seeds=(0, 1, 2), p_list=(1, 2, 3), noise=None, s
             "scaling": scaling_table(model)}
 
 
+def scaling_table(model: Model):
+    """Qubit and search-space growth as the number of facilities increases."""
+    S = model.scenario.supply
+    out = []
+    for F in range(2, 11):
+        slack = 0 if S >= MAX_UNITS * F else max(1, math.ceil(math.log2(S + 1)))
+        n = BITS_PER_FACILITY * F + slack
+        zz = n * (n - 1) // 2  # worst case (fairness + stock couple everything)
+        out.append({"facilities": F, "qubits": n, "states": 2 ** n, "allocations": 4 ** F,
+                    "zz_terms_max": zz, "cx_per_layer_max": 2 * zz})
+    return out
