@@ -250,3 +250,24 @@ def analytic_circuit_stats(n, edges, n_h, p):
             "one_qubit": n + p * (n_h + n)}
 
 
+def build_qiskit_circuit(model: Model, params, p, measure=True):
+    sim_scale = float(max(np.abs(model.h).max(), np.abs(model.J).max(), 1e-12))
+    n = model.n_qubits
+    qc = QuantumCircuit(n, n if measure else 0)
+    qc.h(range(n))
+    g, b = params[:p], params[p:]
+    for k in range(p):
+        for i in range(n):
+            for j in range(i + 1, n):
+                if abs(model.J[i, j]) > 1e-12:
+                    qc.rzz(2 * g[k] * model.J[i, j] / sim_scale, i, j)
+        for i in range(n):
+            if abs(model.h[i]) > 1e-12:
+                qc.rz(2 * g[k] * model.h[i] / sim_scale, i)
+        for i in range(n):
+            qc.rx(2 * b[k], i)
+    if measure:
+        qc.measure(range(n), range(n))
+    return qc
+
+
