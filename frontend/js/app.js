@@ -416,3 +416,9 @@ async function runBenchmark() {
 }
 $('#b-run').addEventListener('click', runBenchmark);
 
+function rowColor(key) {
+  if (key === 'exact') return SOLVERS.exact.color;
+  if (key === 'greedy') return SOLVERS.greedy.color;
+  if (key === 'sa') return SOLVERS.sa.color;
+  return key.endsWith('n') ? SOLVERS.qaoan.color : SOLVERS.qaoa.color;
+}
