@@ -79,3 +79,12 @@ class QAOASim:
         val = (p[:k] @ e[:k]) + (alpha - mass_before) * e[k]
         return float(val / alpha)
 
+    # ---------------------------------------------------------- optimise
+    def initial(self, p, strategy, rng):
+        if strategy == "random":
+            return np.concatenate([rng.uniform(0, math.pi, p), rng.uniform(0, math.pi / 2, p)])
+        # linear ramp ("trotterised adiabatic" start, Zhou et al. 2020)
+        dt = 0.75
+        k = (np.arange(p) + 0.5) / p
+        return np.concatenate([k * dt, (1 - k) * dt])
+
