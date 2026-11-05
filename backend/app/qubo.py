@@ -224,3 +224,32 @@ def feasible_mask(model: Model) -> np.ndarray:
     return ok
 
 
+def describe_solution(model: Model, index: int, optimum: float | None = None) -> Dict:
+    sc = model.scenario
+    dec = model.decode(index)
+    alloc = dec["alloc"]
+    obj = objective_of_alloc(sc, alloc)
+    checks = check_constraints(sc, alloc)
+    feas = all(c["ok"] for c in checks)
+    out = {
+        "index": int(index),
+        "bitstring": model.bitstring(index),
+        "alloc": alloc,
+        "alloc_amount": [a * sc.unit_size for a in alloc],
+        "slack": dec["slack"],
+        "energy": float(model.energies[index]),
+        **obj,
+        "feasible": feas,
+        "checks": checks,
+        "constraints_satisfied": sum(c["ok"] for c in checks),
+        "constraints_total": len(checks),
+        "jain_fairness": jain_index(sc, alloc),
+        "total_allocated": sum(alloc),
+        "coverage": [(_ratio(a, f.demand) if f.demand else 1.0) for f, a in zip(sc.facilities, alloc)],
+    }
+    if optimum is not None and feas:
+        out["gap_pct"] = 100.0 * (obj["objective"] - optimum) / abs(optimum) if optimum else 0.0
+        out["approx_ratio"] = optimum / obj["objective"] if obj["objective"] else 1.0
+    return out
+
+
