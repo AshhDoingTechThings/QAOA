@@ -88,3 +88,13 @@ class QAOASim:
         k = (np.arange(p) + 0.5) / p
         return np.concatenate([k * dt, (1 - k) * dt])
 
+    def _fun(self, p, objective, alpha, trace, stage):
+        def f(x):
+            probs = np.abs(self.state(x, p)) ** 2
+            e = self.expectation(probs)
+            val = self.cvar(probs, alpha) if objective == "cvar" else e
+            self.n_evals += 1
+            trace.append({"g": x[:p].tolist(), "b": x[p:].tolist(), "v": val, "exp": e, "stage": stage})
+            return val
+        return f
+
