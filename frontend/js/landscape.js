@@ -170,4 +170,10 @@ export class LandscapeScene {
     tt.style.top = hit.client[1] + 14 + 'px';
   }
 
+  _lastPoint() {
+    this.vp.raycaster.setFromCamera(this.vp.pointer, this.vp.camera);
+    const h = this.vp.raycaster.intersectObject(this.mesh, false)[0];
+    return h ? h.point : null;
+  }
 }
+
