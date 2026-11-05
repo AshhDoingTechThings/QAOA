@@ -68,3 +68,19 @@ class QuboBuilder:
         self.quad(i0, i1, w * (g3 - g2 - g1 + g0))
 
 
+@dataclass
+class Model:
+    scenario: Scenario
+    n_fac: int
+    n_slack: int
+    n_qubits: int
+    labels: List[str]
+    Q: np.ndarray            # total upper-triangular QUBO (λ applied)
+    const: float
+    components: Dict[str, tuple] = field(default_factory=dict)  # term -> (Q, const) unweighted
+    h: np.ndarray = None
+    J: np.ndarray = None
+    offset: float = 0.0
+    _energies: np.ndarray = None
+    _bits: np.ndarray = None
+
