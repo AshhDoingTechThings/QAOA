@@ -46,3 +46,10 @@ class QAOAReq(BaseModel):
     noise: Noise = Noise()
 
 
+class SAReq(BaseModel):
+    scenario: Scenario
+    seed: int = 0
+    sweeps: int = Field(default=2500, ge=50, le=20000)
+    restarts: int = Field(default=12, ge=1, le=50)
+
+
