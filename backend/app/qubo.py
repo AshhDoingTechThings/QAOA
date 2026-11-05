@@ -115,3 +115,7 @@ def qubo_energy_all(Q, const, bits):
     return np.einsum("si,ij,sj->s", b, Q, b, optimize=True) + const
 
 
+def _ratio(a, d):
+    return a / d if d > 0 else None
+
+
