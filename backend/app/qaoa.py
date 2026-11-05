@@ -314,3 +314,44 @@ def qiskit_crosscheck(model: Model, params, p) -> Optional[Dict]:
             "qiskit_ms": 1000 * rt}
 
 
+# ------------------------------------------------------------------ driver
+def summarize_counts(model: Model, counts, optimum, opt_index, top=24):
+    shots = int(counts.sum())
+    fmask = feasible_mask(model)
+    nz = np.nonzero(counts)[0]
+    E = model.energies
+    feas_shots = int(counts[fmask].sum())
+    # "lowest-energy measured bitstring" → decoded allocation
+    best_idx = int(nz[np.argmin(E[nz])])
+    feas_nz = nz[fmask[nz]]
+    best_feas = int(feas_nz[np.argmin(E[feas_nz])]) if feas_nz.size else None
+    # allocation-level optimum probability (slack bits are bookkeeping only)
+    opt_alloc = model.decode(opt_index)["alloc"]
+    alloc_bits_mask = (1 << (2 * model.n_fac)) - 1
+    opt_alloc_key = opt_index & alloc_bits_mask
+    p_opt_alloc = float(counts[(np.arange(len(counts)) & alloc_bits_mask) == opt_alloc_key].sum() / shots)
+
+    order = nz[np.argsort(-counts[nz])][:top]
+    dist = []
+    for i in order:
+        d = model.decode(int(i))
+        dist.append({"index": int(i), "bitstring": model.bitstring(int(i)), "count": int(counts[i]),
+                     "prob": float(counts[i] / shots), "energy": float(E[i]), "feasible": bool(fmask[i]),
+                     "alloc": d["alloc"], "optimal": bool(i == opt_index)})
+    shot_energies = E[nz]
+    w = counts[nz]
+    mean_e = float((shot_energies * w).sum() / shots)
+    return {
+        "shots": shots,
+        "feasibility_rate": feas_shots / shots,
+        "p_opt": float(counts[opt_index] / shots),
+        "p_opt_alloc": p_opt_alloc,
+        "distinct": int(nz.size),
+        "mean_energy": mean_e,
+        "best_measured": describe_solution(model, best_idx, optimum),
+        "best_feasible": describe_solution(model, best_feas, optimum) if best_feas is not None else None,
+        "distribution": dist,
+        "opt_alloc": opt_alloc,
+    }
+
+
