@@ -37,3 +37,4 @@ from .scenario import BITS_PER_FACILITY, MAX_QUBITS, MAX_UNITS, Scenario
 TERMS = ["cost", "capacity", "demand", "fairness", "min_service"]
 
 
+class QuboBuilder:
