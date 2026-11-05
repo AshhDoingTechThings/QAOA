@@ -60,3 +60,11 @@ class QuboBuilder:
                 self.quad(i, j, w * 2 * a * b)
         self.c += w * const * const
 
+    def register_fn(self, i0, i1, g, w=1.0):
+        g0, g1, g2, g3 = g
+        self.c += w * g0
+        self.lin(i0, w * (g1 - g0))
+        self.lin(i1, w * (g2 - g0))
+        self.quad(i0, i1, w * (g3 - g2 - g1 + g0))
+
+
