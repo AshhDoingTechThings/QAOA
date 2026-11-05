@@ -145,3 +145,19 @@ def qaoa_landscape(r: LandscapeReq):
     return Q.landscape(m, res=r.resolution, objective=r.objective, alpha=r.alpha)
 
 
+@app.post("/api/benchmark")
+def benchmark(r: BenchReq):
+    m = _model(r.scenario)
+    t0 = time.perf_counter()
+    out = run_benchmark(m, seeds=tuple(r.seeds[:5]), p_list=tuple(x for x in r.p_list if 1 <= x <= 4),
+                        noise=r.noise.model_dump(), shots=r.shots, objective=r.objective, alpha=r.alpha)
+    if "error" in out:
+        raise HTTPException(422, out["error"])
+    out["total_ms"] = 1000 * (time.perf_counter() - t0)
+    return out
+
+
+# ----------------------------------------------------------------- frontend
+if FRONTEND.exists():
+    app.mount("/static", StaticFiles(directory=FRONTEND), name="static")
+
