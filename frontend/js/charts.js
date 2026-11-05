@@ -24,3 +24,10 @@ function niceMax(v) {
   for (const m of [1, 1.2, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10]) if (m * e >= v) return m * e;
   return 10 * e;
 }
+function niceStep(span, n = 4) {
+  const raw = span / n, e = Math.pow(10, Math.floor(Math.log10(raw || 1)));
+  for (const m of [1, 2, 2.5, 5, 10]) if (m * e >= raw) return m * e;
+  return 10 * e;
+}
+const fmt = (v, d = 2) => (v === null || v === undefined || Number.isNaN(v) ? '—' : Math.abs(v) >= 1000 ? v.toLocaleString(undefined, { maximumFractionDigits: 0 }) : (+v).toFixed(d));
+
