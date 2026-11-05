@@ -59,3 +59,5 @@ $$('.seg').forEach((g) => g.addEventListener('click', (e) => {
   g.querySelectorAll('button').forEach((x) => x.classList.toggle('on', x === b));
 }));
 
+/* ------------------------------------------------------------------ stages */
+const CITY_HOST = { 0: '#host-city-0', 1: '#host-city-1', 5: '#host-city-5' };
