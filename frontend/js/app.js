@@ -141,3 +141,10 @@ $('#lam-auto').addEventListener('click', async () => {
   renderScenarioForm(); await refreshModel();
   toast(`Hard penalties set to ${s.capacity}: larger than the objective's maximum swing (${fmt(s.objective_swing, 1)}).`);
 });
+function clampNum(t) {
+  let v = +t.value; if (Number.isNaN(v)) v = 0;
+  if (t.min !== '') v = Math.max(+t.min, v);
+  if (t.max !== '') v = Math.min(+t.max, v);
+  return v;
+}
+
