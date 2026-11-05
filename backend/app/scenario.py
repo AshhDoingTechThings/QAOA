@@ -16,3 +16,13 @@ MAX_UNITS = (1 << BITS_PER_FACILITY) - 1  # 3
 MAX_QUBITS = 16                           # exact statevector limit for interactive use
 
 
+class Facility(BaseModel):
+    name: str
+    kind: str = "hospital"                # hospital | clinic | children | trauma | rural (3D styling)
+    demand: int = Field(ge=0, le=MAX_UNITS)
+    capacity: int = Field(ge=0, le=MAX_UNITS)
+    cost: float = Field(ge=0, le=20)      # cost per unit delivered (logistics/operational)
+    priority: float = Field(ge=0, le=10)  # clinical priority weight of unmet demand
+    min_service: int = Field(default=0, ge=0, le=MAX_UNITS)
+
+
