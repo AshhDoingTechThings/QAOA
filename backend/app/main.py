@@ -70,3 +70,10 @@ class BenchReq(BaseModel):
     noise: Noise = Noise(enabled=True)
 
 
+def _model(sc: Scenario):
+    try:
+        return build_model(sc)
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+
+
