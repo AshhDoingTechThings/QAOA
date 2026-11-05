@@ -275,3 +275,9 @@ table.fac td { padding: 4px 4px; }
 .circuit-wrap { overflow-x: auto; }
 .circuit-wrap svg text { font-family: var(--mono); }
 
+.toast {
+  position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 200;
+  background: var(--surface-3); border: 1px solid var(--border-strong); padding: 10px 16px; border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.5); font-size: 13px; display: none; max-width: 90vw;
+}
+.toast.err { border-color: rgba(208,59,59,.6); }
