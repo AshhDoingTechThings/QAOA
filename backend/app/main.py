@@ -84,3 +84,9 @@ def _exact(m):
     return ex
 
 
+@app.get("/api/health")
+def health():
+    return {"ok": True, "qiskit": Q.HAVE_QISKIT, "max_qubits": MAX_QUBITS,
+            "qiskit_version": __import__("qiskit").__version__ if Q.HAVE_QISKIT else None}
+
+
