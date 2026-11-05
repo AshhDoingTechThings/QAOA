@@ -232,3 +232,14 @@ function qaoaParams() {
     noise: { enabled: $('#q-noise').checked, e1: +$('#q-e1').value, e2: +$('#q-e2').value, readout: +$('#q-ro').value, trajectories: 64 },
   };
 }
+function resetQAOAView() {
+  $('#q-kpis').innerHTML = '<div class="muted small">No run yet.</div>';
+  $('#q-verify').innerHTML = '';
+  $('#q-circ').innerHTML = '';
+  $('#ch-conv').innerHTML = '';
+  $('#q-qasm').disabled = true;
+  $('#evo-step').max = 0; $('#evo-label').textContent = 'Run QAOA (step 4) to animate';
+  circuitSVG($('#circ-svg'), S.model, +$('#q-p').value);
+  $('#circ-sub').textContent = `${S.model.n_qubits} qubits · repeated p times`;
+}
+
