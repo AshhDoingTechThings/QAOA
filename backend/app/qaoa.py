@@ -152,3 +152,14 @@ class QAOASim:
         return {"params": best[0], "value": best[1], "best_restart": best[2], "trace": best_trace,
                 "optimize_ms": 1000 * (time.perf_counter() - t0)}
 
+    # -------------------------------------------------------- bloch vectors
+    def bloch(self, psi):
+        out = []
+        for q in range(self.n):
+            v = psi.reshape(self.N >> (q + 1), 2, 1 << q)
+            a, b = v[:, 0, :], v[:, 1, :]
+            c = np.vdot(a, b)
+            out.append([float(2 * c.real), float(2 * c.imag),
+                        float((np.abs(a) ** 2).sum() - (np.abs(b) ** 2).sum())])
+        return out
+
