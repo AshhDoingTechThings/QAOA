@@ -55,3 +55,12 @@ def test_feasible_mask_matches_scalar_check():
         assert fm[i] == is_feasible(m.scenario, m.decode(i)["alloc"])
 
 
+def test_classical_baselines():
+    m = build_model(PRESETS["nurses"])
+    ex = exact(m)
+    g = greedy(m, ex["optimum"])
+    sa = simulated_annealing(m, seed=0, optimum=ex["optimum"])
+    assert g["solution"]["feasible"]
+    assert sa["solution"]["objective"] == pytest.approx(ex["optimum"])
+
+
