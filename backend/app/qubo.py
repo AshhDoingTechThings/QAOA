@@ -52,3 +52,11 @@ class QuboBuilder:
             a, b = min(i, j), max(i, j)
             self.Q[a, b] += v
 
+    def square(self, terms, const, w=1.0):
+        """w · (Σ coef_i x_i + const)²  using x² = x."""
+        for k, (i, a) in enumerate(terms):
+            self.lin(i, w * (a * a + 2 * const * a))
+            for (j, b) in terms[k + 1:]:
+                self.quad(i, j, w * 2 * a * b)
+        self.c += w * const * const
+
