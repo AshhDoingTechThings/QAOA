@@ -110,3 +110,8 @@ class Model:
         return format(index, f"0{self.n_qubits}b")
 
 
+def qubo_energy_all(Q, const, bits):
+    b = bits.astype(np.float64)
+    return np.einsum("si,ij,sj->s", b, Q, b, optimize=True) + const
+
+
