@@ -84,3 +84,11 @@ class Model:
     _energies: np.ndarray = None
     _bits: np.ndarray = None
 
+    # ---------------- energies over the full Hilbert space -----------------
+    @property
+    def bits(self) -> np.ndarray:
+        if self._bits is None:
+            idx = np.arange(1 << self.n_qubits, dtype=np.int64)
+            self._bits = ((idx[:, None] >> np.arange(self.n_qubits)) & 1).astype(np.int8)
+        return self._bits
+
