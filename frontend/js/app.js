@@ -84,3 +84,5 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'ArrowRight') setStage(Math.min(6, S.stage + 1));
   if (e.key === 'ArrowLeft') setStage(Math.max(0, S.stage - 1));
 });
+function markDone(...ids) { ids.forEach((i) => $(`.step[data-stage="${i}"]`).classList.add('done')); }
+
