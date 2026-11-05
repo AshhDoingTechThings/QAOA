@@ -109,3 +109,8 @@ def suggest(sc: Scenario):
     return suggest_penalties(sc)
 
 
+@app.post("/api/solve/exact")
+def solve_exact(sc: Scenario):
+    return _exact(_model(sc))
+
+
