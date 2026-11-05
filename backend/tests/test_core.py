@@ -48,3 +48,10 @@ def test_small_penalty_breaks_formulation():
     assert not exact(build_model(sc))["formulation_valid"]
 
 
+def test_feasible_mask_matches_scalar_check():
+    m = build_model(PRESETS["validation"])
+    fm = feasible_mask(m)
+    for i in range(len(fm)):
+        assert fm[i] == is_feasible(m.scenario, m.decode(i)["alloc"])
+
+
