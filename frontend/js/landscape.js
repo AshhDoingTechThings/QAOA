@@ -145,4 +145,13 @@ export class LandscapeScene {
     return (Z[a0][b0] * (1 - ta) * (1 - tb) + Z[a0 + 1][b0] * ta * (1 - tb) + Z[a0][b0 + 1] * (1 - ta) * tb + Z[a0 + 1][b0 + 1] * ta * tb);
   }
 
+  _tick(dt) {
+    if (!this.anim || !this.pathPts) return;
+    this.anim.t += dt;
+    const p = Math.min(1, this.anim.t / this.anim.dur);
+    this.pathLine.geometry.setDrawRange(0, Math.floor(p * this.pathSegs) * 6 * 6);
+    this.head.position.copy(this.pathCurve.getPoint(p));
+    if (p >= 1) { this.endLabel.visible = true; this.endLabel.position.copy(this.pathPts.at(-1)).add(new THREE.Vector3(0, 1.3, 0)); }
+  }
+
 }
