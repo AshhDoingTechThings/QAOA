@@ -34,3 +34,10 @@ def test_ising_matches_qubo(key):
     assert np.allclose(e_ising, m.energies)
 
 
+@pytest.mark.parametrize("key", PRESET_KEYS)
+def test_formulation_valid_ground_state_is_feasible_optimum(key):
+    ex = exact(build_model(PRESETS[key]))
+    assert ex["formulation_valid"]
+    assert ex["solution"]["feasible"]
+
+
