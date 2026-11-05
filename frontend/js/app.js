@@ -33,3 +33,13 @@ land.mount($('#host-land'));
 sky.mount($('#host-sky'));
 
 /* ---------------------------------------------------------------- helpers */
+async function api(path, body) {
+  const r = await fetch(API + path, body === undefined ? {} : { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  if (!r.ok) {
+    let msg = r.statusText;
+    try { const j = await r.json(); msg = typeof j.detail === 'string' ? j.detail : JSON.stringify(j.detail); } catch {}
+    throw new Error(msg);
+  }
+  return r.json();
+}
+let toastT;
