@@ -53,3 +53,10 @@ class SAReq(BaseModel):
     restarts: int = Field(default=12, ge=1, le=50)
 
 
+class LandscapeReq(BaseModel):
+    scenario: Scenario
+    resolution: int = Field(default=36, ge=8, le=80)
+    objective: str = "cvar"
+    alpha: float = Field(default=0.25, gt=0, le=1)
+
+
