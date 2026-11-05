@@ -95,3 +95,12 @@ def presets():
     return {k: v.model_dump() for k, v in PRESETS.items()}
 
 
+@app.post("/api/model")
+def model(sc: Scenario):
+    t0 = time.perf_counter()
+    m = _model(sc)
+    out = model_payload(m)
+    out["build_ms"] = 1000 * (time.perf_counter() - t0)
+    return out
+
+
