@@ -32,3 +32,17 @@ class Noise(BaseModel):
     trajectories: int = Field(default=64, ge=4, le=256)
 
 
+class QAOAReq(BaseModel):
+    scenario: Scenario
+    p: int = Field(default=1, ge=1, le=6)
+    optimizer: str = "COBYLA"
+    init: str = "interp"
+    objective: str = "cvar"
+    alpha: float = Field(default=0.25, gt=0, le=1)
+    restarts: int = Field(default=2, ge=1, le=8)
+    maxiter: int = Field(default=250, ge=10, le=2000)
+    shots: int = Field(default=2048, ge=64, le=20000)
+    seed: int = 0
+    noise: Noise = Noise()
+
+
