@@ -312,3 +312,4 @@ table.fac td { padding: 4px 4px; }
   .slider-row { grid-template-columns: 96px 1fr 46px; }
 }
 
+table.data.compact th, table.data.compact td { padding: 5px 4px; }
