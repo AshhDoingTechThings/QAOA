@@ -151,4 +151,17 @@ export class CityScene {
     });
   }
 
+  _stock(S) {
+    this.stock = [];
+    for (let i = 0; i < S; i++) {
+      const a = (i / Math.max(S, 1)) * Math.PI * 2;
+      const m = new THREE.Mesh(new THREE.BoxGeometry(UNIT * 0.8, UNIT * 0.8, UNIT * 0.8),
+        new THREE.MeshStandardMaterial({ color: 0x9aa6c2, emissive: 0x7cc4ff, emissiveIntensity: 0.25, metalness: 0.2, roughness: 0.4 }));
+      m.position.set(Math.cos(a) * 2.6, 0.4, Math.sin(a) * 2.6);
+      m.userData.home = m.position.clone();
+      this.dyn.add(m);
+      this.stock.push(m);
+    }
+  }
+
 }
