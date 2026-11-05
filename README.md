@@ -15,3 +15,17 @@ quality, feasibility, runtime, stability, qubits and circuit depth. An interacti
 Scenario → Mathematical model → QUBO → Ising → { Exact | Classical | QAOA (Qiskit) } → Benchmark → Dashboard
 ```
 
+## Run it
+
+```bash
+./run.sh
+```
+
+Then open http://localhost:8000. On the first run, the script creates `.venv` and installs `backend/requirements.txt`.
+
+Tests (formulation, Ising mapping, solvers, Qiskit cross-check, API):
+
+```bash
+cd backend && ../.venv/bin/python -m pytest -q
+```
+
