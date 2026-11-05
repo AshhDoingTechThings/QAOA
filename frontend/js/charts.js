@@ -8,3 +8,11 @@ function el(tag, attrs = {}, parent) {
   if (parent) parent.appendChild(e);
   return e;
 }
+function showTip(html, x, y) {
+  const t = tt();
+  t.innerHTML = html;
+  t.style.display = 'block';
+  const w = t.offsetWidth;
+  t.style.left = Math.min(x + 14, window.innerWidth - w - 8) + 'px';
+  t.style.top = y + 14 + 'px';
+}
