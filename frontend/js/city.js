@@ -8,3 +8,19 @@ const KIND = {
 };
 const CRIT = 0xd03b3b;
 
+export class CityScene {
+  constructor() {
+    this.vp = new Viewport({ position: [0, 19, 24], target: [0, 1.0, 0], autoRotate: true, fov: 40 });
+    this.root = new THREE.Group();
+    this.dyn = new THREE.Group();
+    this.vp.scene.add(this.root, this.dyn);
+    this.vp.scene.fog = new THREE.Fog(0x0a0d14, 30, 60);
+    this.tweens = [];
+    this.flows = [];
+    this.vp.updaters.push((dt, t) => this._tick(dt, t));
+    this._ground();
+  }
+
+  mount(host) { this.vp.mount(host); }
+
+}
