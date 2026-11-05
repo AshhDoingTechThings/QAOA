@@ -114,4 +114,19 @@ export class IsingScene {
     });
   }
 
+  _hover(hit) {
+    const tt = this.tooltip;
+    if (!hit) { if (this._shown) { tt.style.display = 'none'; this._shown = false; } return; }
+    this._shown = true;
+    const u = hit.object.userData;
+    const t = this.targets[u.i];
+    tt.innerHTML = `<div class="t">q${u.i} · ${u.label}${u.slack ? ' (slack)' : ''}</div>
+      <div class="r">h<sub>${u.i}</sub><b>${u.h.toFixed(3)}</b></div>
+      <div class="r">couplings<b>${this.degree[u.i]}</b></div>
+      <div class="r">|Bloch r|<b>${t.len.toFixed(3)}</b></div>`;
+    tt.style.display = 'block';
+    tt.style.left = hit.client[0] + 14 + 'px';
+    tt.style.top = hit.client[1] + 14 + 'px';
+  }
 }
+
