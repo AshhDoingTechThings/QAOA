@@ -399,3 +399,20 @@ async function runSA() {
 }
 
 /* -------------------------------------------------------------- benchmark */
+async function runBenchmark() {
+  const ps = $$('#b-p button.on').map((b) => +b.dataset.v);
+  if (!ps.length) return toast('Select at least one QAOA depth.', true);
+  const n = +$('#b-seeds').value;
+  const P = qaoaParams();
+  $('#b-run').disabled = true;
+  $('#b-status').textContent = `running ${n} seed(s) × ${ps.length} depth(s)${$('#b-noise').checked ? ' × (ideal + noisy)' : ''}…`;
+  try {
+    S.bench = await api('/api/benchmark', { scenario: S.scenario, seeds: [...Array(n).keys()], p_list: ps, shots: 1024, objective: P.objective, alpha: P.alpha, noise: { ...P.noise, enabled: $('#b-noise').checked } });
+    renderBench();
+    markDone(6);
+    $('#b-status').textContent = `done in ${fmt(S.bench.total_ms / 1000, 1)} s`;
+  } catch (e) { toast(e.message, true); $('#b-status').textContent = ''; }
+  finally { $('#b-run').disabled = false; }
+}
+$('#b-run').addEventListener('click', runBenchmark);
+
