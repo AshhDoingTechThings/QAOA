@@ -127,6 +127,53 @@
   </div>
 </section>
 
+<!-- ============================================================ 2 MODEL/QUBO -->
+<section class="stage" data-stage="2">
+  <div class="col">
+    <div class="panel">
+      <div class="kicker">Step 2 · Mathematical model → QUBO</div>
+      <h2>One binary objective</h2>
+      <p><b>Decision variables.</b> Each facility gets a 2-bit register:</p>
+      <div class="eq">a<sub>f</sub> = x<sub>f,0</sub> + 2·x<sub>f,1</sub> ∈ {0,1,2,3},&nbsp;&nbsp; x ∈ {0,1}</div>
+      <p><b>Objective + penalties:</b></p>
+      <div class="eq">min<sub>x</sub> x<sup>T</sup>Qx = H<sub>cost</sub> + <span class="l">λ<sub>1</sub></span>H<sub>capacity</sub> + <span class="l">λ<sub>2</sub></span>H<sub>demand</sub> + <span class="l">λ<sub>3</sub></span>H<sub>fairness</sub> + <span class="l">λ<sub>4</sub></span>H<sub>min-service</sub></div>
+      <ul class="small">
+        <li>H<sub>cost</sub> = Σ c<sub>f</sub>a<sub>f</sub></li>
+        <li>H<sub>demand</sub> = Σ p<sub>f</sub>·max(0, d<sub>f</sub>−a<sub>f</sub>): unmet demand weighted by priority</li>
+        <li>H<sub>capacity</sub> = Σ max(0, a<sub>f</sub>−cap<sub>f</sub>) + (Σa<sub>f</sub> + s − S)²: slack s turns Σa ≤ S into an equality</li>
+        <li>H<sub>fairness</sub> = Σ<sub>f&lt;g</sub>(a<sub>f</sub>/d<sub>f</sub> − a<sub>g</sub>/d<sub>g</sub>)²: equal coverage ratios</li>
+        <li>H<sub>min</sub> = Σ max(0, m<sub>f</sub>−a<sub>f</sub>)</li>
+      </ul>
+      <div class="note"><span class="who">Engineer's note</span>Any function of one 2-bit register is <b>exactly quadratic</b>: g(a) = g₀ + (g₁−g₀)x₀ + (g₂−g₀)x₁ + (g₃−g₂−g₁+g₀)x₀x₁. So the piece-wise “max(0,·)” terms need <b>no extra ancilla qubits</b>.</div>
+    </div>
+    <div class="panel">
+      <h3>Penalty weights λ</h3>
+      <div class="slider-row"><label>λ₁ capacity</label><input type="range" id="lam-capacity" min="0" max="80" step="0.5"><span class="val" id="lam-capacity-v"></span></div>
+      <div class="slider-row"><label>λ₂ demand</label><input type="range" id="lam-demand" min="0" max="10" step="0.1"><span class="val" id="lam-demand-v"></span></div>
+      <div class="slider-row"><label>λ₃ fairness</label><input type="range" id="lam-fairness" min="0" max="20" step="0.1"><span class="val" id="lam-fairness-v"></span></div>
+      <div class="slider-row"><label>λ₄ min-service</label><input type="range" id="lam-min_service" min="0" max="80" step="0.5"><span class="val" id="lam-min_service-v"></span></div>
+      <div class="row" style="margin-top:8px">
+        <button class="btn small" id="lam-auto">Auto-tune hard penalties</button>
+        <span id="valid-badge" class="badge">validity: run exact</span>
+      </div>
+      <p class="small muted" id="lam-hint" style="margin-top:8px"></p>
+    </div>
+  </div>
+  <div class="right">
+    <div class="panel">
+      <div class="row" style="justify-content:space-between">
+        <div><div class="viz-title">QUBO matrix Q</div><div class="viz-sub" id="qubo-sub"></div></div>
+        <div class="small muted">blue = negative (reward) · red = positive (penalty)</div>
+      </div>
+      <div style="position:relative;margin-top:10px"><canvas id="qubo-canvas" style="width:100%;max-width:620px;display:block;margin:0 auto"></canvas></div>
+    </div>
+    <div class="grid2">
+      <div class="panel"><h3>Qubit register</h3><div class="register" id="register"></div></div>
+      <div class="panel"><h3>Terms</h3><div class="table-wrap"><table class="data" id="terms-table"></table></div></div>
+    </div>
+  </div>
+</section>
+
 </main>
 </body>
 </html>
