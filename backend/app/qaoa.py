@@ -104,3 +104,11 @@ class QAOASim:
             opts["rhobeg"] = rho
         return minimize(f, x0, method=optimizer, options=opts)
 
+    @staticmethod
+    def interp(x, p):
+        """INTERP heuristic (Zhou et al., PRX 2020): p → p+1 initial angles."""
+        def I(v):
+            v = np.concatenate([[0.0], v, [0.0]])
+            return np.array([(i - 1) / p * v[i - 1] + (p - i + 1) / p * v[i] for i in range(1, p + 2)])
+        return np.concatenate([I(x[:p]), I(x[p:])])
+
