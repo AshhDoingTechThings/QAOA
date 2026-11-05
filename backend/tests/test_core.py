@@ -87,3 +87,11 @@ def test_qaoa_beats_uniform_sampling():
     assert r["ideal"]["amplification_feasible"] > 1.2
 
 
+def test_api_end_to_end():
+    c = TestClient(app)
+    sc = c.get("/api/presets").json()["validation"]
+    assert c.post("/api/model", json=sc).json()["n_qubits"] == 8
+    q = c.post("/api/solve/qaoa", json={"scenario": sc, "p": 1, "noise": {"enabled": True, "trajectories": 8}}).json()
+    assert "noisy" in q and q["sampled"]["shots"] == 2048
+    b = c.post("/api/benchmark", json={"scenario": sc, "seeds": [0], "p_list": [1]}).json()
+    assert {r["key"] for r in b["rows"]} >= {"exact", "greedy", "sa", "qaoa1", "qaoa1n"}
