@@ -117,3 +117,63 @@ select:focus, input:focus, .btn:focus-visible { outline: 2px solid var(--accent)
 .step.active .num { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: var(--accent-ink); border-color: transparent; }
 .step.done .num { border-color: var(--good); color: var(--good); }
 
+/* --------------------------------------------------------------- stages */
+main { padding: 18px 20px 40px; }
+.stage { display: none; animation: fade .35s ease; }
+.stage.active { display: grid; grid-template-columns: minmax(320px, 400px) minmax(0, 1fr); gap: 18px; }
+.stage > * { min-width: 0; }
+.topbar .btn.primary { white-space: nowrap; }
+@keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+.panel {
+  background: var(--surface-1); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px 18px;
+}
+.panel + .panel { margin-top: 14px; }
+.col > .panel + .panel, .col > * + * { margin-top: 14px; }
+.panel h2 { font-size: 18px; margin: 0 0 4px; letter-spacing: .1px; }
+.panel h3 { font-size: 13px; text-transform: uppercase; letter-spacing: .8px; color: var(--text-muted); margin: 0 0 10px; font-weight: 650; }
+.panel p { margin: 6px 0; color: var(--text-secondary); }
+.panel ul { margin: 6px 0; padding-left: 18px; color: var(--text-secondary); }
+.panel li { margin: 4px 0; }
+.panel li b, .panel p b { color: var(--text-primary); font-weight: 600; }
+.kicker { font-size: 12px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--accent); font-weight: 700; }
+
+.note {
+  border-left: 3px solid var(--accent-2);
+  background: linear-gradient(90deg, rgba(165, 139, 255, 0.08), transparent);
+  padding: 10px 12px; border-radius: 0 10px 10px 0; margin: 10px 0;
+  color: var(--text-secondary); font-size: 13px;
+}
+.note b { color: var(--text-primary); }
+.note .who { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--accent-2); font-weight: 700; display: block; margin-bottom: 2px; }
+
+.eq {
+  font-family: "Cambria Math", "STIX Two Math", "Times New Roman", serif;
+  font-size: 15.5px; color: var(--text-primary);
+  background: var(--surface-2); border: 1px solid var(--border);
+  padding: 10px 12px; border-radius: 10px; margin: 8px 0; overflow-x: auto; white-space: nowrap;
+}
+.eq .l { color: var(--accent); }
+.eq sub, .eq sup { font-size: 0.7em; }
+
+.viz {
+  position: relative; border-radius: var(--radius); overflow: hidden;
+  background: radial-gradient(800px 400px at 50% 0%, rgba(124, 196, 255, 0.06), transparent 70%), var(--surface-1);
+  border: 1px solid var(--border);
+}
+.viz.h3d { height: min(62vh, 600px); min-height: 380px; }
+.viz.h3d.short { height: min(48vh, 440px); min-height: 320px; }
+.viz canvas { display: block; }
+.viz .overlay-tl, .viz .overlay-tr, .viz .overlay-bl, .viz .overlay-br {
+  position: absolute; z-index: 3; pointer-events: none; font-size: 12px; color: var(--text-secondary);
+}
+.viz .overlay-tl { top: 12px; left: 14px; }
+.viz .overlay-tr { top: 12px; right: 14px; text-align: right; }
+.viz .overlay-bl { bottom: 12px; left: 14px; }
+.viz .overlay-br { bottom: 12px; right: 14px; text-align: right; }
+.viz .overlay-tl b { color: var(--text-primary); font-size: 13px; }
+.viz .pe { pointer-events: auto; }
+.viz-title { font-size: 13px; font-weight: 650; color: var(--text-primary); }
+.viz-sub { font-size: 12px; color: var(--text-muted); }
+
