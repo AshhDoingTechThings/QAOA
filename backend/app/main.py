@@ -127,3 +127,15 @@ def solve_sa(r: SAReq):
                                optimum=_exact(m)["optimum"])
 
 
+@app.post("/api/solve/qaoa")
+def solve_qaoa(r: QAOAReq):
+    if r.optimizer not in ("COBYLA", "Nelder-Mead", "Powell"):
+        raise HTTPException(400, "optimizer must be COBYLA, Nelder-Mead or Powell")
+    m = _model(r.scenario)
+    ex = _exact(m)
+    opt_idx = encode_alloc(m, ex["solution"]["alloc"])
+    return Q.run_qaoa(m, ex["optimum"], opt_idx, p=r.p, optimizer=r.optimizer, init=r.init,
+                      objective=r.objective, alpha=r.alpha, restarts=r.restarts, maxiter=r.maxiter,
+                      shots=r.shots, seed=r.seed, noise=r.noise.model_dump())
+
+
