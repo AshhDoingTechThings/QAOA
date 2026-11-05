@@ -154,4 +154,20 @@ export class LandscapeScene {
     if (p >= 1) { this.endLabel.visible = true; this.endLabel.position.copy(this.pathPts.at(-1)).add(new THREE.Vector3(0, 1.3, 0)); }
   }
 
+  _hover(hit) {
+    const tt = this.tooltip;
+    if (!hit || !this.L) { if (this._shown) { tt.style.display = 'none'; this._shown = false; } return; }
+    this._shown = true;
+    const L = this.L;
+    const local = this._lastPoint();
+    if (!local) return;
+    const g = L.gammas[0] + (local.x / W + 0.5) * (L.gammas.at(-1) - L.gammas[0]);
+    const b = L.betas[0] + (0.5 + local.z / D) * (L.betas.at(-1) - L.betas[0]);
+    const z = this.sampleZ(g, b);
+    tt.innerHTML = `<div class="t">p = 1 landscape</div><div class="r">γ<b>${g.toFixed(3)}</b></div><div class="r">β<b>${b.toFixed(3)}</b></div><div class="r">objective<b>${z.toFixed(2)}</b></div>`;
+    tt.style.display = 'block';
+    tt.style.left = hit.client[0] + 14 + 'px';
+    tt.style.top = hit.client[1] + 14 + 'px';
+  }
+
 }
