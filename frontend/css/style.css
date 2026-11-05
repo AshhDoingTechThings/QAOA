@@ -281,3 +281,16 @@ table.fac td { padding: 4px 4px; }
   box-shadow: 0 10px 30px rgba(0,0,0,.5); font-size: 13px; display: none; max-width: 90vw;
 }
 .toast.err { border-color: rgba(208,59,59,.6); }
+.busy { position: absolute; inset: 0; display: none; place-items: center; z-index: 5; background: rgba(10,13,20,.45); backdrop-filter: blur(2px); font-size: 13px; color: var(--text-secondary); }
+.busy.on { display: grid; }
+.spinner { width: 28px; height: 28px; border-radius: 50%; border: 3px solid var(--surface-3); border-top-color: var(--accent); animation: spin 0.9s linear infinite; margin: 0 auto 8px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.muted { color: var(--text-muted); }
+.sec { color: var(--text-secondary); }
+.hr { height: 1px; background: var(--border); margin: 12px 0; }
+.small { font-size: 12px; }
+.kbd { font-family: var(--mono); font-size: 11px; padding: 1px 5px; border: 1px solid var(--border-strong); border-radius: 4px; color: var(--text-secondary); }
+.solver-pick { display: flex; flex-wrap: wrap; gap: 6px; }
+.solver-pick button { display: inline-flex; align-items: center; gap: 6px; }
+.solver-pick button.on { border-color: var(--text-primary); background: var(--surface-3); }
+
