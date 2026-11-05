@@ -174,6 +174,32 @@
   </div>
 </section>
 
+<!-- ============================================================ 3 ISING -->
+<section class="stage" data-stage="3">
+  <div class="col">
+    <div class="panel">
+      <div class="kicker">Step 3 · Ising mapping</div>
+      <h2>From bits to spins</h2>
+      <div class="eq">x<sub>i</sub> = (1 − z<sub>i</sub>) / 2,&nbsp;&nbsp; z<sub>i</sub> ∈ {−1,+1}</div>
+      <div class="eq">H<sub>C</sub> = Σ<sub>i</sub> h<sub>i</sub>Z<sub>i</sub> + Σ<sub>i&lt;j</sub> J<sub>ij</sub>Z<sub>i</sub>Z<sub>j</sub> + const</div>
+      <p>Each qubit is drawn as a <b>Bloch sphere</b>. Each coupling J<sub>ij</sub> is a bond whose thickness shows |J| and whose colour shows its sign. Each Z<sub>i</sub>Z<sub>j</sub> term becomes an RZZ gate (2 CNOTs) in every QAOA layer.</p>
+      <div class="kpis" id="ising-kpis"></div>
+    </div>
+    <div class="panel">
+      <h3>Watch the circuit act on the qubits</h3>
+      <p class="small">After a QAOA run, step through the layers. The cost layer is diagonal: it changes phases and rotates the arrows around Z. The mixer then turns those phase differences into changes in amplitude.</p>
+      <div class="player"><button class="btn small" id="evo-play">▶</button><input type="range" id="evo-step" min="0" max="0" value="0"></div>
+      <div class="step-label" id="evo-label">Run QAOA (step 4) to animate</div>
+    </div>
+  </div>
+  <div class="right">
+    <div class="viz h3d" id="host-ising">
+      <div class="overlay-tl"><b>Ising interaction graph</b><br><span class="small">Qubit pairs are grouped by facility; dashed rings are slack qubits</span></div>
+      <div class="overlay-tr small"><span class="swatch" style="background:#3987e5"></span>J &lt; 0 &nbsp; <span class="swatch" style="background:#e34948"></span>J &gt; 0</div>
+    </div>
+  </div>
+</section>
+
 </main>
 </body>
 </html>
