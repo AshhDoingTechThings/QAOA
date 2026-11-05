@@ -393,3 +393,8 @@ function showSolver(k) {
     <div class="hr"></div><div class="table-wrap"><table class="data compact"><tr><th>Constraint</th><th style="text-align:left">Scope</th><th>Check</th><th>Status</th></tr>${rows}</table></div>
     <p class="small muted" style="margin-top:8px">bit-string <span class="mono">${s.bitstring}</span> (q${S.model.n_qubits - 1}…q0) · QUBO energy ${fmt(s.energy, 2)}</p>`;
 }
+async function runSA() {
+  try { S.sa = await api('/api/solve/sa', { scenario: S.scenario, seed: 0 }); renderResults(); }
+  catch (e) { toast(e.message, true); }
+}
+
