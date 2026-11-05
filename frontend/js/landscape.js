@@ -16,3 +16,18 @@ const W = 12, D = 8, HMAX = 4.2;
 // square-root height scale: expands the low-energy valleys the optimiser cares about
 const hScale = (t) => Math.sqrt(Math.max(0, t));
 
+export class LandscapeScene {
+  constructor(tooltip) {
+    this.vp = new Viewport({ position: [9, 8, 13], target: [0, 0.8, 0], fov: 42 });
+    this.g = new THREE.Group();
+    this.path = new THREE.Group();
+    this.vp.scene.add(this.g, this.path);
+    this.tooltip = tooltip;
+    this.vp.onHover = (hit) => this._hover(hit);
+    this.vp.updaters.push((dt, t) => this._tick(dt, t));
+    this.anim = null;
+  }
+
+  mount(host) { this.vp.mount(host); }
+
+}
