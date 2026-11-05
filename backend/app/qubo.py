@@ -163,3 +163,15 @@ def build_model(sc: Scenario) -> Model:
     return m
 
 
+def qubo_to_ising(Q, const):
+    """x_i = (1 − z_i)/2  →  H = Σ h_i z_i + Σ_{i<j} J_ij z_i z_j + offset."""
+    n = Q.shape[0]
+    d = np.diag(Q).copy()
+    U = np.triu(Q, 1)
+    S = U + U.T
+    h = -d / 2 - S.sum(axis=1) / 4
+    J = U / 4
+    offset = const + d.sum() / 2 + U.sum() / 4
+    return h, J, offset
+
+
