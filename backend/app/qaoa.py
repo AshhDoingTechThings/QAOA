@@ -98,3 +98,9 @@ class QAOASim:
             return val
         return f
 
+    def _minimize(self, f, x0, optimizer, maxiter, rho=0.3):
+        opts = {"maxiter": maxiter}
+        if optimizer == "COBYLA":
+            opts["rhobeg"] = rho
+        return minimize(f, x0, method=optimizer, options=opts)
+
