@@ -45,3 +45,10 @@ class QuboBuilder:
     def lin(self, i, v):
         self.Q[i, i] += v
 
+    def quad(self, i, j, v):
+        if i == j:
+            self.Q[i, i] += v
+        else:
+            a, b = min(i, j), max(i, j)
+            self.Q[a, b] += v
+
