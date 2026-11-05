@@ -20,3 +20,12 @@ def _agg(vals: List[float]):
             "min": min(vals), "max": max(vals)}
 
 
+def run_benchmark(model: Model, seeds=(0, 1, 2), p_list=(1, 2, 3), noise=None, shots=1024,
+                  objective="cvar", alpha=0.25) -> Dict:
+    ex = exact(model)
+    if ex.get("infeasible_problem"):
+        return {"error": ex["message"]}
+    opt = ex["optimum"]
+    opt_idx = encode_alloc(model, ex["solution"]["alloc"])
+    rows = []
+
