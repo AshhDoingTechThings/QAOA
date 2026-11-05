@@ -200,3 +200,7 @@ def check_constraints(sc: Scenario, alloc) -> List[Dict]:
     return checks
 
 
+def is_feasible(sc: Scenario, alloc) -> bool:
+    return all(c["ok"] for c in check_constraints(sc, alloc))
+
+
