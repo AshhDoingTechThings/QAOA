@@ -100,3 +100,37 @@ def greedy(model: Model, optimum=None) -> Dict:
     return {"solver": "greedy", "label": "Rule-based greedy", "solution": sol, "runtime_ms": 1000 * rt}
 
 
+def simulated_annealing(model: Model, seed=0, sweeps=2500, restarts=12, optimum=None) -> Dict:
+    rng = np.random.default_rng(seed)
+    n = model.n_qubits
+    Q = model.Q
+    d = np.diag(Q).copy()
+    U = np.triu(Q, 1)
+    W = U + U.T
+    t0 = time.perf_counter()
+    best_x, best_e = None, np.inf
+    trace = []
+    e_scale = max(np.abs(Q).max(), 1e-9)
+    T0, T1 = 2.0 * e_scale, 0.01 * e_scale
+    for r in range(restarts):
+        x = rng.integers(0, 2, n).astype(np.float64)
+        field = W @ x
+        e = float(x @ d + x @ U @ x)
+        for s in range(sweeps):
+            T = T0 * (T1 / T0) ** (s / max(sweeps - 1, 1))
+            for i in rng.permutation(n):
+                delta = (1 - 2 * x[i]) * (d[i] + field[i])
+                if delta <= 0 or rng.random() < np.exp(-delta / T):
+                    step = 1 - 2 * x[i]
+                    x[i] += step
+                    field += W[:, i] * step
+                    e += delta
+            if r == 0 and s % 30 == 0:
+                trace.append(e + model.const)
+        if e < best_e:
+            best_e, best_x = e, x.copy()
+    rt = time.perf_counter() - t0
+    idx = int(sum(int(b) << i for i, b in enumerate(best_x)))
+    sol = describe_solution(model, idx, optimum)
+    return {"solver": "sa", "label": "Simulated annealing", "solution": sol,
+            "runtime_ms": 1000 * rt, "trace": trace, "seed": seed}
