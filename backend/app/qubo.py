@@ -175,3 +175,14 @@ def qubo_to_ising(Q, const):
     return h, J, offset
 
 
+# ---------------------------------------------------------------- evaluation
+def objective_of_alloc(sc: Scenario, alloc) -> Dict[str, float]:
+    lam = sc.lambdas
+    cost = sum(f.cost * a for f, a in zip(sc.facilities, alloc))
+    unmet = sum(f.priority * max(0, f.demand - a) for f, a in zip(sc.facilities, alloc))
+    ratios = [a / f.demand for f, a in zip(sc.facilities, alloc) if f.demand > 0]
+    fair = sum((r1 - r2) ** 2 for r1, r2 in itertools.combinations(ratios, 2))
+    total = cost + lam.demand * unmet + lam.fairness * fair
+    return {"cost": cost, "unmet_weighted": unmet, "fairness": fair, "objective": total}
+
+
