@@ -243,3 +243,15 @@ function resetQAOAView() {
   $('#circ-sub').textContent = `${S.model.n_qubits} qubits · repeated p times`;
 }
 
+async function ensureLandscape(objective, alpha) {
+  const key = JSON.stringify([S.scenario, objective, alpha]);
+  if (S.landKey === key) return;
+  $('#land-busy').classList.add('on');
+  try {
+    S.landscape = await api('/api/landscape', { scenario: S.scenario, resolution: 40, objective, alpha });
+    S.landKey = key;
+    land.setLandscape(S.landscape);
+    $('#land-legend').innerHTML = `${objective === 'cvar' ? 'CVaR<sub>α</sub>' : '⟨H<sub>C</sub>⟩'} from ${fmt(S.landscape.min, 1)} to ${fmt(S.landscape.max, 1)} · ground energy ${fmt(S.landscape.e_ground, 1)}`;
+  } finally { $('#land-busy').classList.remove('on'); }
+}
+
