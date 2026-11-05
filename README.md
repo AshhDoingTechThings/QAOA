@@ -48,3 +48,13 @@ cd backend && ../.venv/bin/python -m pytest -q
 - Every max(0, ·) term depends on one 2-bit register only. Any such function is **exactly quadratic**, g(a) = g0 + (g1−g0)x0 + (g2−g0)x1 + (g3−g2−g1+g0)x0x1, so it needs no ancilla qubits.
 - "Auto-tune hard penalties" sets λ1 and λ4 above the objective's maximum swing. The app then checks that the **QUBO ground state equals the feasible optimum**.
 
+## Demo script (about 5 minutes)
+
+1. **Overview.** State the problem, then the honest stance: there is *no quantum-advantage claim*.
+2. **Scenario.** Ghost cubes show demand and red planes show capacity. Point to the qubit count (2 per facility plus slack) as the real hardware constraint.
+3. **QUBO.** Move λ₁ down to about 1. The badge turns red because the ground state is now infeasible (the limitation on slide 15). Press *Auto-tune* to restore it.
+4. **Ising.** Show the coupling graph. After step 4, press ▶ to watch each layer rotate the Bloch vectors.
+5. **QAOA.** Press *Run QAOA*. Show the optimiser path on the 3D landscape, the Qiskit verification badge (fidelity 1.0), the transpiled depth for all-to-all and linear connectivity, and the ideal and noisy skyline (★ marks the optimum). Download the QASM to show the path to hardware.
+6. **Results.** Switch between solvers and watch units fly to the hospitals. Every constraint is checked.
+7. **Benchmark.** Run 3 seeds at p = 1–3. Feasibility and P_opt rise with p, while noise and the CX count rise too. Exact search and annealing win on this small instance, which is exactly what the project set out to measure honestly.
+
