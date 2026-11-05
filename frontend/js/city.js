@@ -164,4 +164,49 @@ export class CityScene {
     }
   }
 
+  /** alloc: units per facility, color: css hex, opts.feasible */
+  setAllocation(alloc, color = '#3987e5', opts = {}) {
+    if (!this.sc) return;
+    this.vp.clearGroup(this.dyn);
+    this.tweens = [];
+    this.flows = [];
+    this._stock(this.sc.supply);
+    if (!alloc) { this._labels(null); return; }
+    const col = new THREE.Color(color);
+    let used = 0, delay = 0;
+    alloc.forEach((a, i) => {
+      const f = this.sc.facilities[i];
+      const sl = this.slots[i];
+      if (a > 0) this._arc(sl.base, col, a);
+      for (let s = 0; s < a; s++) {
+        const over = s >= f.capacity;
+        let cube = this.stock[used];
+        if (!cube) {  // over-allocating beyond the stock: materialise a red cube
+          cube = new THREE.Mesh(new THREE.BoxGeometry(UNIT * 0.8, UNIT * 0.8, UNIT * 0.8), new THREE.MeshStandardMaterial());
+          cube.position.set(0, 2.1, 0);
+          this.dyn.add(cube);
+        }
+        used++;
+        const c = over || used > this.sc.supply ? new THREE.Color(CRIT) : col;
+        cube.material.color.copy(c);
+        cube.material.emissive = c.clone();
+        cube.material.emissiveIntensity = 0.45;
+        const from = cube.position.clone();
+        const to = new THREE.Vector3(sl.base.x, sl.y[Math.min(s, 2)], sl.base.z);
+        const mid = from.clone().add(to).multiplyScalar(0.5);
+        mid.y += 4.5;
+        const curve = new THREE.QuadraticBezierCurve3(from, mid, to);
+        const d0 = opts.animate === false ? 0 : delay;
+        this.tweens.push({ t: -d0, dur: opts.animate === false ? 0.001 : 1.1, fn: (p) => {
+          cube.position.copy(curve.getPoint(ease(p)));
+          const sc = 0.8 + 0.2 * ease(p);
+          cube.scale.setScalar(sc / 0.8);
+          cube.rotation.y = (1 - ease(p)) * 3;
+        } });
+        delay += 0.12;
+      }
+    });
+    this._labels(alloc, opts.unitLabel);
+  }
+
 }
