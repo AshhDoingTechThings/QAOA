@@ -16,3 +16,5 @@ function showTip(html, x, y) {
   t.style.left = Math.min(x + 14, window.innerWidth - w - 8) + 'px';
   t.style.top = y + 14 + 'px';
 }
+function hideTip() { tt().style.display = 'none'; }
+
