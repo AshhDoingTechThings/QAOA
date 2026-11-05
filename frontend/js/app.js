@@ -492,3 +492,20 @@ async function runAll() {
 $('#run-all').addEventListener('click', runAll);
 
 /* ------------------------------------------------------------------ boot */
+async function boot() {
+  try {
+    const h = await api('/api/health');
+    $('#backend-dot').className = 'dot ok';
+    $('#backend-txt').textContent = h.qiskit ? `backend · Qiskit ${h.qiskit_version}` : 'backend · NumPy simulator';
+  } catch {
+    $('#backend-dot').className = 'dot bad';
+    $('#backend-txt').textContent = 'backend offline';
+    toast('Backend not reachable. Start it with ./run.sh', true);
+    return;
+  }
+  S.presets = await api('/api/presets');
+  $('#preset').innerHTML = Object.entries(S.presets).map(([k, v]) => `<option value="${k}">${esc(v.name)}</option>`).join('');
+  $('#preset').value = S.presetKey;
+  $('#preset').addEventListener('change', (e) => loadPreset(e.target.value));
+  await loadPreset(S.presetKey);
+}
