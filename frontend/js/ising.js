@@ -103,4 +103,15 @@ export class IsingScene {
     });
   }
 
+  _tick(dt) {
+    const k = 1 - Math.exp(-dt * 6);
+    this.arrows.forEach((a, i) => {
+      const t = this.targets[i];
+      a.cur.lerp(t.v, k).normalize();
+      a.len += (t.len - a.len) * k;
+      a.arrow.setDirection(a.cur);
+      a.arrow.setLength(Math.max(0.08, 0.62 * a.len), 0.2 * Math.max(a.len, 0.3), 0.12);
+    });
+  }
+
 }
