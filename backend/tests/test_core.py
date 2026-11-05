@@ -41,3 +41,10 @@ def test_formulation_valid_ground_state_is_feasible_optimum(key):
     assert ex["solution"]["feasible"]
 
 
+def test_small_penalty_breaks_formulation():
+    sc = PRESETS["ventilators"].model_copy(deep=True)
+    sc.lambdas.capacity = 0.1
+    sc.lambdas.min_service = 0.1
+    assert not exact(build_model(sc))["formulation_valid"]
+
+
