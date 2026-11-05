@@ -26,3 +26,11 @@ def test_qubo_energy_equals_objective_on_feasible_encodings(key):
         assert m.energies[idx] == pytest.approx(objective_of_alloc(m.scenario, alloc)["objective"], abs=1e-9)
 
 
+@pytest.mark.parametrize("key", PRESET_KEYS)
+def test_ising_matches_qubo(key):
+    m = build_model(PRESETS[key])
+    z = 1 - 2 * m.bits.astype(float)
+    e_ising = z @ m.h + np.einsum("si,ij,sj->s", z, m.J, z) + m.offset
+    assert np.allclose(e_ising, m.energies)
+
+
