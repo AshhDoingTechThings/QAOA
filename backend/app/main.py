@@ -161,3 +161,6 @@ def benchmark(r: BenchReq):
 if FRONTEND.exists():
     app.mount("/static", StaticFiles(directory=FRONTEND), name="static")
 
+    @app.get("/")
+    def index():
+        return FileResponse(FRONTEND / "index.html")
