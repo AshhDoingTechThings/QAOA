@@ -409,3 +409,23 @@ def run_qaoa(model: Model, optimum: float, opt_index: int, p=1, optimizer="COBYL
     return out
 
 
+def landscape(model: Model, res=36, objective="expectation", alpha=0.2):
+    """p = 1 energy landscape  F(γ, β) = ⟨γ,β|H_C|γ,β⟩  on a grid."""
+    sim = QAOASim(model)
+    gs = np.linspace(0, math.pi, res)
+    bs = np.linspace(-math.pi / 2, math.pi / 2, res)
+    Z = np.zeros((res, res))
+    for a, g in enumerate(gs):
+        phase = np.exp(-1j * g * sim.Hn)
+        for c, b in enumerate(bs):
+            psi = np.full(sim.N, 1 / math.sqrt(sim.N), dtype=np.complex128) * phase
+            psi = sim.mixer(psi, b)
+            probs = np.abs(psi) ** 2
+            Z[a, c] = sim.cvar(probs, alpha) if objective == "cvar" else sim.expectation(probs)
+    k = np.unravel_index(np.argmin(Z), Z.shape)
+    return {"gammas": gs.tolist(), "betas": bs.tolist(), "Z": Z.tolist(),
+            "min": float(Z.min()), "max": float(Z.max()),
+            "argmin": {"gamma": float(gs[k[0]]), "beta": float(bs[k[1]])},
+            "e_ground": float(sim.E.min()), "e_mean": float(sim.E.mean())}
+
+
