@@ -92,4 +92,15 @@ export class IsingScene {
     }
   }
 
+  /** bloch: array of [x, y, z] (Bloch coords) */
+  setBloch(bloch) {
+    bloch.forEach(([x, y, z], i) => {
+      if (!this.targets[i]) return;
+      const v = new THREE.Vector3(x, z, -y);
+      const len = v.length();
+      this.targets[i].v.copy(len > 1e-6 ? v.normalize() : new THREE.Vector3(0, 1, 0));
+      this.targets[i].len = len;
+    });
+  }
+
 }
