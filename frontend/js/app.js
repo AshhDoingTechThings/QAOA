@@ -86,3 +86,4 @@ document.addEventListener('keydown', (e) => {
 });
 function markDone(...ids) { ids.forEach((i) => $(`.step[data-stage="${i}"]`).classList.add('done')); }
 
+/* ---------------------------------------------------------------- scenario */
