@@ -163,3 +163,17 @@ class QAOASim:
                         float((np.abs(a) ** 2).sum() - (np.abs(b) ** 2).sum())])
         return out
 
+    def evolution(self, params, p):
+        """Per-qubit Bloch vectors and ⟨H_C⟩ after every circuit layer."""
+        g, b = params[:p], params[p:]
+        psi = np.full(self.N, 1 / math.sqrt(self.N), dtype=np.complex128)
+        steps = [{"label": "H⊗n  (|+⟩ⁿ)", "bloch": self.bloch(psi), "exp": self.expectation(np.abs(psi) ** 2)}]
+        for k in range(p):
+            psi *= np.exp(-1j * g[k] * self.Hn)
+            steps.append({"label": f"Cost layer {k + 1}  e^(-iγ{k + 1}H_C)", "bloch": self.bloch(psi),
+                          "exp": self.expectation(np.abs(psi) ** 2)})
+            psi = self.mixer(psi, b[k])
+            steps.append({"label": f"Mixer layer {k + 1}  e^(-iβ{k + 1}H_M)", "bloch": self.bloch(psi),
+                          "exp": self.expectation(np.abs(psi) ** 2)})
+        return steps
+
