@@ -227,4 +227,22 @@ export class CityScene {
 
   pulse() { this._pulse = 1.0; }
 
+  _tick(dt, t) {
+    this.core.rotation.y += dt * 0.6;
+    this.core.rotation.x += dt * 0.25;
+    this.orbit.rotation.z += dt * 0.8;
+    const pl = this._pulse || 0;
+    this.coreGlow.scale.setScalar(1 + 0.08 * Math.sin(t * 2.2) + pl * 0.8);
+    if (this._pulse) this._pulse = Math.max(0, this._pulse - dt * 1.5);
+    for (const tw of this.tweens) {
+      tw.t += dt;
+      if (tw.t >= 0 && !tw.done) {
+        const p = Math.min(tw.t / tw.dur, 1);
+        tw.fn(p);
+        if (p >= 1) tw.done = true;
+      }
+    }
+    for (const f of this.flows) f.mesh.position.copy(f.curve.getPoint((t * 0.35 + f.off) % 1));
+  }
 }
+
