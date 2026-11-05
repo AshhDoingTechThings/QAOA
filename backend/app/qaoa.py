@@ -112,3 +112,43 @@ class QAOASim:
             return np.array([(i - 1) / p * v[i - 1] + (p - i + 1) / p * v[i] for i in range(1, p + 2)])
         return np.concatenate([I(x[:p]), I(x[p:])])
 
+    def optimize(self, p=1, optimizer="COBYLA", init="interp", objective="expectation",
+                 alpha=0.2, restarts=2, maxiter=250, seed=0):
+        rng = np.random.default_rng(seed)
+        t0 = time.perf_counter()
+        if init == "interp":
+            # coarse p=1 grid → best `restarts` seeds → local refine → grow depth layer by layer
+            trace = []
+            coarse = []
+            for g in np.linspace(0.1, math.pi * 0.9, 10):
+                phase = np.exp(-1j * g * self.Hn)
+                for b in np.linspace(-math.pi / 2 * 0.9, math.pi / 2 * 0.9, 9):
+                    psi = self.mixer(np.full(self.N, 1 / math.sqrt(self.N), dtype=np.complex128) * phase, b)
+                    pr = np.abs(psi) ** 2
+                    coarse.append((self.cvar(pr, alpha) if objective == "cvar" else self.expectation(pr), g, b))
+            coarse.sort()
+            best = None
+            for _, g, b in coarse[:restarts]:
+                tr = []
+                res = self._minimize(self._fun(1, objective, alpha, tr, 1), np.array([g, b]), optimizer, maxiter, 0.15)
+                if best is None or res.fun < best[1]:
+                    best, trace = (res.x, res.fun), tr
+            x = best[0]
+            for k in range(2, p + 1):
+                res = self._minimize(self._fun(k, objective, alpha, trace, k), self.interp(x, k - 1),
+                                     optimizer, maxiter, 0.1)
+                x = res.x
+                best = (x, res.fun)
+            return {"params": best[0], "value": best[1], "best_restart": 0, "trace": trace,
+                    "optimize_ms": 1000 * (time.perf_counter() - t0)}
+
+        best, best_trace = None, None
+        for r in range(restarts):
+            x0 = self.initial(p, init if r == 0 else "random", rng)
+            trace = []
+            res = self._minimize(self._fun(p, objective, alpha, trace, p), x0, optimizer, maxiter)
+            if best is None or res.fun < best[1]:
+                best, best_trace = (res.x, res.fun, r), trace
+        return {"params": best[0], "value": best[1], "best_restart": best[2], "trace": best_trace,
+                "optimize_ms": 1000 * (time.perf_counter() - t0)}
+
