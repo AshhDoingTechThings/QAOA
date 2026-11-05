@@ -23,4 +23,39 @@ export class CityScene {
 
   mount(host) { this.vp.mount(host); }
 
+  _ground() {
+    const disk = new THREE.Mesh(new THREE.CircleGeometry(13.5, 96),
+      new THREE.MeshStandardMaterial({ color: 0x0f1320, roughness: 0.9, metalness: 0.1 }));
+    disk.rotation.x = -Math.PI / 2;
+    this.vp.scene.add(disk);
+    const polar = new THREE.PolarGridHelper(13.5, 12, 6, 96, 0x2a3346, 0x1c2333);
+    polar.position.y = 0.01;
+    this.vp.scene.add(polar);
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(13.5, 0.05, 8, 160),
+      new THREE.MeshBasicMaterial({ color: 0x7cc4ff, transparent: true, opacity: 0.5 }));
+    ring.rotation.x = Math.PI / 2;
+    this.vp.scene.add(ring);
+
+    // depot / hybrid optimiser core
+    const base = new THREE.Mesh(new THREE.CylinderGeometry(1.7, 1.9, 0.6, 6),
+      new THREE.MeshStandardMaterial({ color: 0x1b2233, metalness: 0.5, roughness: 0.4 }));
+    base.position.y = 0.3;
+    this.vp.scene.add(base);
+    this.core = new THREE.Mesh(new THREE.IcosahedronGeometry(0.9, 1),
+      new THREE.MeshBasicMaterial({ color: 0xa58bff, wireframe: true, transparent: true, opacity: 0.85 }));
+    this.core.position.y = 2.1;
+    this.coreGlow = new THREE.Mesh(new THREE.SphereGeometry(0.55, 32, 16),
+      new THREE.MeshBasicMaterial({ color: 0x7cc4ff, transparent: true, opacity: 0.55 }));
+    this.coreGlow.position.y = 2.1;
+    const orbit = new THREE.Mesh(new THREE.TorusGeometry(1.35, 0.025, 8, 80),
+      new THREE.MeshBasicMaterial({ color: 0x7cc4ff, transparent: true, opacity: 0.6 }));
+    orbit.position.y = 2.1;
+    orbit.rotation.x = Math.PI / 2.4;
+    this.orbit = orbit;
+    this.vp.scene.add(this.core, this.coreGlow, orbit);
+    this.depotLabel = label('<b>Regional stock</b><small>hybrid optimiser</small>');
+    this.depotLabel.position.set(0, 3.6, 0);
+    this.vp.scene.add(this.depotLabel);
+  }
+
 }
