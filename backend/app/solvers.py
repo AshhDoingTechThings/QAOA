@@ -79,3 +79,24 @@ def exact(model: Model) -> Dict:
     }
 
 
+def greedy(model: Model, optimum=None) -> Dict:
+    """Rule-based planner: honour minimum service, then hand out the remaining
+    stock unit-by-unit to the facility with the highest priority/cost ratio that
+    still has unmet demand and spare capacity."""
+    sc = model.scenario
+    t0 = time.perf_counter()
+    alloc = [min(f.min_service, f.capacity) for f in sc.facilities]
+    stock = sc.supply - sum(alloc)
+    while stock > 0:
+        cand = [(f.priority / max(f.cost, 1e-6), i) for i, f in enumerate(sc.facilities)
+                if alloc[i] < min(f.capacity, f.demand, MAX_UNITS)]
+        if not cand:
+            break
+        _, i = max(cand)
+        alloc[i] += 1
+        stock -= 1
+    rt = time.perf_counter() - t0
+    sol = describe_solution(model, encode_alloc(model, alloc), optimum)
+    return {"solver": "greedy", "label": "Rule-based greedy", "solution": sol, "runtime_ms": 1000 * rt}
+
+
