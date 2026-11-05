@@ -177,3 +177,9 @@ class QAOASim:
                           "exp": self.expectation(np.abs(psi) ** 2)})
         return steps
 
+    # ------------------------------------------------------------- sampling
+    def sample(self, psi, shots, rng):
+        probs = np.abs(psi) ** 2
+        probs /= probs.sum()
+        return np.bincount(rng.choice(self.N, size=shots, p=probs), minlength=self.N)
+
