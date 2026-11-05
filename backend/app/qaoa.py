@@ -35,3 +35,15 @@ except Exception:  # pragma: no cover
 
 
 class QAOASim:
+    def __init__(self, model: Model):
+        self.m = model
+        self.n = model.n_qubits
+        self.N = 1 << self.n
+        self.E = model.energies                     # true QUBO energies (for reporting)
+        self.scale = float(max(np.abs(model.h).max(), np.abs(model.J).max(), 1e-12))
+        self.Hn = (self.E - model.offset) / self.scale
+        self.order = np.argsort(self.E)
+        self.edges = [(i, j, model.J[i, j]) for i in range(self.n) for j in range(i + 1, self.n)
+                      if abs(model.J[i, j]) > 1e-12]
+        self.n_evals = 0
+
