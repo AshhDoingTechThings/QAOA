@@ -119,3 +119,47 @@ def _ratio(a, d):
     return a / d if d > 0 else None
 
 
+def build_model(sc: Scenario) -> Model:
+    F = len(sc.facilities)
+    max_total = MAX_UNITS * F
+    n_slack = 0 if sc.supply >= max_total else max(1, math.ceil(math.log2(sc.supply + 1)))
+    n = BITS_PER_FACILITY * F + n_slack
+    if n > MAX_QUBITS:
+        raise ValueError(f"Scenario needs {n} qubits; the interactive statevector limit is {MAX_QUBITS}.")
+
+    labels = []
+    for f, fac in enumerate(sc.facilities):
+        labels += [f"x[{f},0]·1", f"x[{f},1]·2"]
+    labels += [f"s[{j}]·{1 << j}" for j in range(n_slack)]
+
+    comps = {t: QuboBuilder(n) for t in TERMS}
+    for f, fac in enumerate(sc.facilities):
+        i0, i1 = 2 * f, 2 * f + 1
+        comps["cost"].register_fn(i0, i1, [fac.cost * a for a in range(4)])
+        comps["demand"].register_fn(i0, i1, [fac.priority * max(0, fac.demand - a) for a in range(4)])
+        comps["capacity"].register_fn(i0, i1, [max(0, a - fac.capacity) for a in range(4)])
+        comps["min_service"].register_fn(i0, i1, [max(0, fac.min_service - a) for a in range(4)])
+
+    if n_slack:  # total stock:  Σ a_f + Σ 2^j s_j − S = 0
+        terms = [(2 * f, 1.0) for f in range(F)] + [(2 * f + 1, 2.0) for f in range(F)]
+        terms += [(2 * F + j, float(1 << j)) for j in range(n_slack)]
+        comps["capacity"].square(terms, -float(sc.supply))
+
+    facs = [(f, fac) for f, fac in enumerate(sc.facilities) if fac.demand > 0]
+    for (f, A), (g, B) in itertools.combinations(facs, 2):
+        terms = [(2 * f, 1 / A.demand), (2 * f + 1, 2 / A.demand),
+                 (2 * g, -1 / B.demand), (2 * g + 1, -2 / B.demand)]
+        comps["fairness"].square(terms, 0.0)
+
+    lam = sc.lambdas
+    w = {"cost": 1.0, "capacity": lam.capacity, "demand": lam.demand,
+         "fairness": lam.fairness, "min_service": lam.min_service}
+    Q = sum(w[t] * comps[t].Q for t in TERMS)
+    const = sum(w[t] * comps[t].c for t in TERMS)
+
+    m = Model(scenario=sc, n_fac=F, n_slack=n_slack, n_qubits=n, labels=labels,
+              Q=Q, const=const, components={t: (comps[t].Q, comps[t].c) for t in TERMS})
+    m.h, m.J, m.offset = qubo_to_ising(Q, const)
+    return m
+
+
