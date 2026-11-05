@@ -141,4 +141,14 @@ export class CityScene {
     this._stock(sc.supply);
   }
 
+  _labels(alloc, unitLabel) {
+    const sc = this.sc;
+    sc.facilities.forEach((f, i) => {
+      const a = alloc ? alloc[i] : null;
+      const tag = a === null ? `d ${f.demand} · cap ${f.capacity} · p ${f.priority}` :
+        `<b style="color:var(--text-primary)">${a} unit${a === 1 ? '' : 's'}</b> = ${a * sc.unit_size} ${unitLabel || sc.unit_label} · d ${f.demand}`;
+      this.facLabels[i].element.innerHTML = `${escapeHtml(f.name)}<small>${tag}</small>`;
+    });
+  }
+
 }
