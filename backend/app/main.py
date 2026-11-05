@@ -139,3 +139,9 @@ def solve_qaoa(r: QAOAReq):
                       shots=r.shots, seed=r.seed, noise=r.noise.model_dump())
 
 
+@app.post("/api/landscape")
+def qaoa_landscape(r: LandscapeReq):
+    m = _model(r.scenario)
+    return Q.landscape(m, res=r.resolution, objective=r.objective, alpha=r.alpha)
+
+
