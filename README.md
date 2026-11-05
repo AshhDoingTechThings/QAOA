@@ -29,3 +29,15 @@ Tests (formulation, Ising mapping, solvers, Qiskit cross-check, API):
 cd backend && ../.venv/bin/python -m pytest -q
 ```
 
+## Architecture
+
+| Layer | File | What it does |
+|---|---|---|
+| Scenario | `backend/app/scenario.py` | Facilities (demand, capacity, cost, priority, min-service), stock, λ weights, 4 presets |
+| Model → QUBO → Ising | `backend/app/qubo.py` | 2-bit register per facility, slack register for the stock inequality, exact quadratic encoding of every term, x = (1−z)/2 Ising mapping, constraint checker |
+| Classical | `backend/app/solvers.py` | Exact enumeration (QUBO ground state **and** the original constrained optimum), rule-based greedy, simulated annealing |
+| Quantum | `backend/app/qaoa.py` | NumPy statevector QAOA, COBYLA / Nelder-Mead / Powell, ⟨H⟩ or CVaR-α objective, INTERP / ramp / random initialisation, depolarising + read-out noise via quantum trajectories, Qiskit Statevector cross-check, Qiskit-transpiled depth and CX counts (all-to-all and linear), OpenQASM 2 export |
+| Benchmark | `backend/app/benchmark.py` | Multi-seed runs under identical conditions: gap, approximation ratio, feasibility rate, P_opt, stability (std), runtime, qubits, depth, plus a scaling table |
+| API | `backend/app/main.py` | FastAPI: `/api/model`, `/api/solve/{exact,greedy,sa,qaoa}`, `/api/landscape`, `/api/benchmark`. It also serves the frontend |
+| Frontend | `frontend/` | Three.js 3D views (hospital network, Ising graph with Bloch spheres, p=1 energy landscape with optimiser path, bit-string skyline) and SVG charts. Three.js is vendored, so it works offline |
+
