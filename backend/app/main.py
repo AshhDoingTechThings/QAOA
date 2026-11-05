@@ -77,3 +77,10 @@ def _model(sc: Scenario):
         raise HTTPException(400, str(e))
 
 
+def _exact(m):
+    ex = exact(m)
+    if ex.get("infeasible_problem"):
+        raise HTTPException(422, ex["message"])
+    return ex
+
+
