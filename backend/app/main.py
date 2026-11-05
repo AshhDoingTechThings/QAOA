@@ -90,3 +90,8 @@ def health():
             "qiskit_version": __import__("qiskit").__version__ if Q.HAVE_QISKIT else None}
 
 
+@app.get("/api/presets")
+def presets():
+    return {k: v.model_dump() for k, v in PRESETS.items()}
+
+
