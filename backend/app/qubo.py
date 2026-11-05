@@ -264,3 +264,32 @@ def suggest_penalties(sc: Scenario) -> Dict[str, float]:
     return {"capacity": p, "min_service": p, "objective_swing": swing}
 
 
+def model_payload(model: Model) -> Dict:
+    sc = model.scenario
+    n = model.n_qubits
+    J = model.J
+    edges = [{"i": i, "j": j, "J": float(J[i, j])} for i in range(n) for j in range(i + 1, n)
+             if abs(J[i, j]) > 1e-12]
+    comps = {}
+    for t, (Qt, ct) in model.components.items():
+        comps[t] = {"nnz": int((np.abs(Qt) > 1e-12).sum()),
+                    "linear": int((np.abs(np.diag(Qt)) > 1e-12).sum()),
+                    "quadratic": int((np.abs(np.triu(Qt, 1)) > 1e-12).sum())}
+    Qs = model.Q + np.triu(model.Q, 1).T
+    return {
+        "n_qubits": n,
+        "n_facility_qubits": BITS_PER_FACILITY * model.n_fac,
+        "n_slack": model.n_slack,
+        "hilbert_dim": 1 << n,
+        "labels": model.labels,
+        "qubit_owner": [f // 2 for f in range(2 * model.n_fac)] + [-1] * model.n_slack,
+        "Q": np.round(Qs, 4).tolist(),
+        "const": model.const,
+        "h": np.round(model.h, 4).tolist(),
+        "J_edges": edges,
+        "offset": model.offset,
+        "components": comps,
+        "lambdas": sc.lambdas.model_dump(),
+        "suggested": suggest_penalties(sc),
+        "max_abs_coef": float(max(np.abs(model.h).max(), np.abs(J).max() if edges else 0)),
+    }
