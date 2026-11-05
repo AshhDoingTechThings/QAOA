@@ -274,3 +274,43 @@ async function runQAOA() {
 }
 $('#q-run').addEventListener('click', runQAOA);
 
+function renderQAOA() {
+  const r = S.qaoa, id = r.ideal, sm = r.sampled;
+  const tiles = [
+    kpi('⟨H<sub>C</sub>⟩', fmt(id.expectation, 1), `uniform ${fmt(id.uniform_expectation, 0)} · ground ${fmt(id.ground_energy, 1)}`),
+    kpi('P<sub>opt</sub> (ideal)', pct(id.p_opt_alloc_exact, 2), `${fmt(id.amplification_opt, 1)}× over uniform`),
+    kpi('Feasible mass', pct(id.feasible_mass), `${fmt(id.amplification_feasible, 2)}× over uniform ${pct(id.uniform_feasible)}`),
+    kpi('Best measured', fmt(r.solution.objective, 2), `${r.solution.feasible ? 'feasible' : 'infeasible'} · gap ${r.solution.gap_pct !== undefined ? fmt(r.solution.gap_pct, 1) + '%' : '—'}`),
+    kpi('Circuit evals', r.evaluations, `${r.optimizer} · ${fmt(r.optimize_ms, 0)} ms`),
+  ];
+  if (r.noisy) tiles.push(kpi('Noisy feasible shots', pct(r.noisy.feasibility_rate), `ideal ${pct(sm.feasibility_rate)} · F≈${fmt(r.noisy.est_fidelity, 3)}`));
+  $('#q-kpis').innerHTML = tiles.join('');
+  const qc = r.qiskit_check;
+  $('#q-verify').innerHTML = qc
+    ? `<span class="badge ok">✓ Verified against Qiskit Statevector</span> <span class="small muted">fidelity ${qc.fidelity.toFixed(9)} · max |Δp| ${qc.max_prob_diff.toExponential(1)}</span>`
+    : '<span class="badge">Qiskit not installed: analytic resource estimates</span>';
+  const c = r.circuit, tr = c.transpiled;
+  $('#q-circ').innerHTML = `<tr><th>Connectivity</th><th>Depth</th><th>CX</th><th>Total gates</th></tr>` +
+    (tr ? `<tr><td>All-to-all</td><td>${tr.all_to_all.depth}</td><td>${tr.all_to_all.cx}</td><td>${tr.all_to_all.size}</td></tr>
+           <tr><td>Linear chain (SWAPs)</td><td>${tr.linear.depth}</td><td>${tr.linear.cx}</td><td>${tr.linear.size}</td></tr>` :
+      `<tr><td>Analytic</td><td>${c.analytic.depth}</td><td>${c.analytic.cx}</td><td>—</td></tr>`) +
+    `<tr><td class="muted">Qubits · p</td><td colspan="3">${c.n_qubits} · ${c.p}</td></tr>`;
+  $('#q-qasm').disabled = !c.qasm;
+  // convergence
+  const trc = r.trace;
+  const series = [{ name: r.objective === 'cvar' ? `CVaR α=${r.alpha}` : '⟨H_C⟩', color: SOLVERS.qaoa.color, points: trc.map((t, i) => [i, t.v]), markers: false }];
+  if (r.objective === 'cvar') series.push({ name: '⟨H_C⟩', color: MUTED, dashed: true, points: trc.map((t, i) => [i, t.exp]), markers: false });
+  lineChart($('#ch-conv'), { series, xLabel: 'evaluation', yFormat: (v) => fmt(v, 0), yMin: Math.floor(Math.min(...trc.map((t) => Math.min(t.v, t.exp))) / 10) * 10, height: 200 });
+  circuitSVG($('#circ-svg'), S.model, r.p, r.gammas, r.betas);
+  $('#circ-sub').textContent = `γ = [${r.gammas.map((g) => g.toFixed(2)).join(', ')}] · β = [${r.betas.map((b) => b.toFixed(2)).join(', ')}]`;
+  // skyline
+  const rows = [{ name: 'Ideal', color: SOLVERS.qaoa.color, dist: sm.distribution }];
+  if (r.noisy) rows.push({ name: 'Noisy', color: SOLVERS.qaoan.color, dist: r.noisy.distribution });
+  sky.setData(rows, S.scenario, S.exact.solution.alloc);
+  $('#sky-legend').innerHTML = rows.map((x) => `<span class="swatch" style="background:${x.color}"></span>${x.name}`).join(' &nbsp; ');
+  // evolution
+  const ev = r.evolution;
+  $('#evo-step').max = ev.length - 1;
+  $('#evo-step').value = ev.length - 1;
+  showEvo(ev.length - 1);
+}
